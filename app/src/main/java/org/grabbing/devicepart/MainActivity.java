@@ -11,6 +11,7 @@ import android.widget.TextView;
 
 import org.grabbing.devicepart.data.http.HttpGet;
 import org.grabbing.devicepart.domain.QueryData;
+import org.grabbing.devicepart.domain.QuickCompletion;
 import org.grabbing.devicepart.managers.AccountManager;
 import org.grabbing.devicepart.managers.FaceManager;
 import org.grabbing.devicepart.managers.QueryExecutionManager;
@@ -27,12 +28,33 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+        setContentView(R.layout.test0);
 
-        testInitButton();
+        //testInitButton();
+        testInitButtonV2();
     }
 
-    private void testInitButton() {
+    private void testInitButtonV2() {
+        Button test = findViewById(R.id.test_run);
+        TextView textView = findViewById(R.id.test_output);
+
+        Executor executor = new Executor(getApplicationContext());
+        executor.start();
+
+        executor.init(new QueryData("http://94.103.92.242:8090/", -2), new QueryData("http://94.103.92.242:8090/", -3), new QueryData("http://94.103.92.242:8090/", -4));
+
+        executor.setTask("login", "password", new QueryData("http://94.103.92.242:8090/", -1));
+
+        test.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                executor.setTask(new QuickCompletion());
+                Log.d("MAIN * on click", "onClick: ");
+            }
+        });
+    }
+
+    /*private void testInitButton() {
         EditText url = findViewById(R.id.e_url);
         EditText login = findViewById(R.id.e_login);
         EditText password = findViewById(R.id.e_password);
@@ -119,7 +141,6 @@ public class MainActivity extends AppCompatActivity {
 
                 queryReceiptManager.run();
 
-                queryDataList[0] = queryReceiptManager.getData();
 
             }
         });
@@ -127,7 +148,7 @@ public class MainActivity extends AppCompatActivity {
         run.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                queryExecutionManager.setData(queryDataList[0]);
+                queryExecutionManager.setData(queryReceiptManager.getData());
                 queryExecutionManager.run();
                 queryDataList[0] = queryExecutionManager.getData();
             }
@@ -144,5 +165,5 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-    }
+    }*/
 }

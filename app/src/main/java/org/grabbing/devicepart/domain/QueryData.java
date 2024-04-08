@@ -55,6 +55,12 @@ public class QueryData {
     public Map<String, String> getParameters() {return parameters;}
     public Map<String, String> getQueryHeaders() {
         Map<String, String> result = new HashMap<>();
+        /*if (queryHeaders != null) {
+            result.putAll(queryHeaders);
+        }
+        if (authorizationHeaders != null) {
+            result.putAll(authorizationHeaders);
+        }*/
         result.putAll(queryHeaders);
         result.putAll(authorizationHeaders);
         return result;

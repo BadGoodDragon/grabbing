@@ -4,6 +4,7 @@ import android.content.Context;
 
 import com.google.gson.Gson;
 
+import org.grabbing.devicepart.data.http.HttpGet;
 import org.grabbing.devicepart.data.http.HttpPost;
 import org.grabbing.devicepart.data.http.HttpQuery;
 import org.grabbing.devicepart.domain.QueryData;
@@ -63,6 +64,18 @@ public class FaceManager {
         HttpQuery httpPost = new HttpPost(context);
 
         httpPost.runRightAway(query, new EmptyHook());
+    }
+
+    public void getListOfLinkedUsersInit() {
+        Map<String, String> body = new HashMap<>();
+        body.put("type", "getListOfLinkedUsers");
+
+        Gson gson = new Gson();
+
+        query.setQueryBody(gson.toJson(body));
+
+        HttpQuery httpGet = new HttpGet(context);
+
     }
 
     public QueryData getQuery() {return query;}

@@ -7,6 +7,6 @@ import org.grabbing.devicepart.domain.QueryData;
 public class EmptyHook implements Hook{
     @Override
     public void capture(QueryData query) {
-        Log.i("Hook.EmptyHook.capture * start", query.toString());
+        //Log.i("Hook.EmptyHook.capture * start", query.toString());
     }
 }
