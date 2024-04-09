@@ -1,28 +1,28 @@
 package org.grabbing.devicepart.hooks;
 
 import org.grabbing.devicepart.domain.QueryData;
+import org.grabbing.devicepart.livedata.QueryDataListLive;
 
 import java.util.List;
 
 public class QueryExecutionManagerHook implements Hook {
-    private List<QueryData> data;
+    private QueryDataListLive data;
     private int currentQuantity;
+    private int expectedQuantity;
 
-    public QueryExecutionManagerHook() {
-        currentQuantity = 0;
-    }
-    public QueryExecutionManagerHook(List<QueryData> data) {
+    public QueryExecutionManagerHook(QueryDataListLive data) {
         this.data = data;
+        this.expectedQuantity = data.get().size();
     }
-
-    public void setData(List<QueryData> data) {this.data = data;}
 
     @Override
     public void capture(QueryData query) {
         data.add(query);
         currentQuantity++;
+        if (currentQuantity >= expectedQuantity) {
+            data.setStatus(true);
+        }
+
     }
 
-    public int getCurrentQuantity() {return currentQuantity;}
-    public List<QueryData> getData() {return data;}
 }

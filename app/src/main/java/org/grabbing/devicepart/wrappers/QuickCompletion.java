@@ -1,4 +1,4 @@
-package org.grabbing.devicepart.domain;
+package org.grabbing.devicepart.wrappers;
 
 public class QuickCompletion {
     private boolean stop;

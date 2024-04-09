@@ -8,31 +8,32 @@ import org.grabbing.devicepart.data.http.HttpPost;
 import org.grabbing.devicepart.data.http.HttpQuery;
 import org.grabbing.devicepart.domain.QueryData;
 import org.grabbing.devicepart.hooks.QueryReceiptManagerHook;
+import org.grabbing.devicepart.livedata.QueryDataListLive;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class QueryReceiptManager {
     private final Context context;
-    private List<QueryData> data;
+    private QueryDataListLive data;
     private QueryData query;
-    private QueryReceiptManagerHook hook;
 
     public QueryReceiptManager(Context context) {
         this.context = context;
     }
 
     public void setQuery(QueryData query) {this.query = query;}
+    public void setData(QueryDataListLive data) {this.data = data;}
 
     public void run() {
-        data = new ArrayList<>();
-        hook = new QueryReceiptManagerHook(data);
+        data.clearAll();
 
+        QueryReceiptManagerHook hook = new QueryReceiptManagerHook(data);
         HttpQuery httpGet = new HttpGet(context);
-
         httpGet.runRightAway(query, hook);
     }
 
-    public List<QueryData> getData() {return data;}
-    public boolean isHasResponse() {return hook.isHasResponse();}
+    public QueryData getQuery() {
+        return query;
+    }
 }

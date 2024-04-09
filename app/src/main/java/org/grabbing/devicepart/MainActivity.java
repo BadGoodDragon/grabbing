@@ -1,27 +1,18 @@
 package org.grabbing.devicepart;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.lifecycle.Observer;
 
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
-import android.widget.EditText;
 import android.widget.TextView;
 
-import org.grabbing.devicepart.data.http.HttpGet;
 import org.grabbing.devicepart.domain.QueryData;
-import org.grabbing.devicepart.domain.QuickCompletion;
-import org.grabbing.devicepart.managers.AccountManager;
-import org.grabbing.devicepart.managers.FaceManager;
-import org.grabbing.devicepart.managers.QueryExecutionManager;
-import org.grabbing.devicepart.managers.QueryReceiptManager;
-import org.grabbing.devicepart.managers.SendingResultManager;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import org.grabbing.devicepart.livedata.QueryDataListLive;
+import org.grabbing.devicepart.livedata.TokenLive;
+import org.grabbing.devicepart.wrappers.QuickCompletion;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -36,20 +27,63 @@ public class MainActivity extends AppCompatActivity {
 
     private void testInitButtonV2() {
         Button test = findViewById(R.id.test_run);
+        Button stop = findViewById(R.id.test_stop);
         TextView textView = findViewById(R.id.test_output);
 
         Executor executor = new Executor(getApplicationContext());
         executor.start();
 
-        executor.init(new QueryData("http://94.103.92.242:8090/", -2), new QueryData("http://94.103.92.242:8090/", -3), new QueryData("http://94.103.92.242:8090/", -4));
+        TokenLive tokenLive = new TokenLive();
 
-        executor.setTask("login", "password", new QueryData("http://94.103.92.242:8090/", -1));
+        tokenLive.getStatusLive().observeForever(new Observer<Boolean>() {
+            @Override
+            public void onChanged(Boolean value) {
+                if (value) {
+                    synchronized (executor) {
+                        executor.notify();
+                    }
+                }
+            }
+        });
+
+        executor.setTokenLive(tokenLive);
+        executor.setTask("login", "password", new QueryData("http://94.103.92.242:8090/au", -1));
+
+
+        executor.init(new QueryData("http://94.103.92.242:8090/", -2), new QueryData("http://94.103.92.242:8090/", -3), new QueryData("http://94.103.92.242:8090/ret", -4));
+
+
+
+        QueryDataListLive listLive = new QueryDataListLive();
+        listLive.getStatusLive().observeForever(new Observer<Boolean>() {
+            @Override
+            public void onChanged(Boolean value) {
+                if (value) {
+                    synchronized (executor) {
+                        executor.notify();
+                    }
+                }
+            }
+        });
+
+        executor.setListLive(listLive);
+
+        QuickCompletion quickCompletion = new QuickCompletion();
 
         test.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                executor.setTask(new QuickCompletion());
+                quickCompletion.setStop(false);
+                executor.setTask(quickCompletion);
                 Log.d("MAIN * on click", "onClick: ");
+
+            }
+        });
+
+        stop.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                quickCompletion.setStop(true);
             }
         });
     }

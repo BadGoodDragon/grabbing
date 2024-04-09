@@ -6,6 +6,7 @@ import android.content.Context;
 import org.grabbing.devicepart.data.http.HttpGet;
 import org.grabbing.devicepart.domain.QueryData;
 import org.grabbing.devicepart.hooks.QueryExecutionManagerHook;
+import org.grabbing.devicepart.livedata.QueryDataListLive;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -13,7 +14,7 @@ import java.util.List;
 public class QueryExecutionManager {
     private final Context context;
     private List<QueryData> data;
-    private List<QueryData> outputData;
+    private QueryDataListLive outputData;
 
     private QueryExecutionManagerHook hook;
 
@@ -22,9 +23,10 @@ public class QueryExecutionManager {
     }
 
     public void setData(List<QueryData> data) {this.data = data;}
+    public void setOutputData(QueryDataListLive outputData) {this.outputData = outputData;}
 
     public void run() {
-        outputData = new ArrayList<>();
+        outputData.setStatus(false);
         hook = new QueryExecutionManagerHook(outputData);
 
         HttpGet httpGet = new HttpGet(context);
@@ -33,9 +35,5 @@ public class QueryExecutionManager {
         httpGet.run();
     }
 
-    public boolean isDone() {
-        return hook.getCurrentQuantity() == data.size();
-    }
 
-    public List<QueryData> getData() {return outputData;}
 }

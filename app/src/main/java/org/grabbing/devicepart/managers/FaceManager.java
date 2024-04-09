@@ -9,6 +9,8 @@ import org.grabbing.devicepart.data.http.HttpPost;
 import org.grabbing.devicepart.data.http.HttpQuery;
 import org.grabbing.devicepart.domain.QueryData;
 import org.grabbing.devicepart.hooks.EmptyHook;
+import org.grabbing.devicepart.hooks.FaceManagerHook;
+import org.grabbing.devicepart.wrappers.BooleanWrapper;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -18,6 +20,8 @@ import java.util.Map;
 public class FaceManager {
     private final Context context;
     private QueryData query;
+    private FaceManagerHook hook;
+    private List<String> linkedUsers;
 
     public FaceManager(Context context) {
         this.context = context;
@@ -74,8 +78,19 @@ public class FaceManager {
 
         query.setQueryBody(gson.toJson(body));
 
-        HttpQuery httpGet = new HttpGet(context);
+        linkedUsers = new ArrayList<>();
+        hook = new FaceManagerHook(linkedUsers);
 
+        HttpQuery httpGet = new HttpGet(context);
+        httpGet.runRightAway(query, hook);
+    }
+
+    public boolean isHasResponse() {
+        return hook.isHasResponse();
+    }
+
+    public List<String> getListOfLinkedUsers() {
+        return linkedUsers;
     }
 
     public QueryData getQuery() {return query;}

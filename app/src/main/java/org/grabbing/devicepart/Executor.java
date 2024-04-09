@@ -3,8 +3,12 @@ package org.grabbing.devicepart;
 import android.content.Context;
 import android.util.Log;
 
+import androidx.lifecycle.Observer;
+
 import org.grabbing.devicepart.domain.QueryData;
-import org.grabbing.devicepart.domain.QuickCompletion;
+import org.grabbing.devicepart.livedata.QueryDataListLive;
+import org.grabbing.devicepart.livedata.TokenLive;
+import org.grabbing.devicepart.wrappers.QuickCompletion;
 import org.grabbing.devicepart.managers.AccountManager;
 import org.grabbing.devicepart.managers.FaceManager;
 import org.grabbing.devicepart.managers.QueryExecutionManager;
@@ -23,6 +27,8 @@ public class Executor extends Thread {
     private QueryExecutionManager queryExecutionManager;
     private QueryReceiptManager queryReceiptManager;
     private SendingResultManager sendingResultManager;
+    private QueryDataListLive listLive;
+    private TokenLive tokenLive;
 
     public Executor(Context context) {
         this.context = context;
@@ -40,10 +46,6 @@ public class Executor extends Thread {
     }
 
     public void init(QueryData faceManagerQuery, QueryData queryReceiptManagerQuery, QueryData sendingResultManagerQuery) {
-        accountManager.authorizeQuery(faceManagerQuery);
-        accountManager.authorizeQuery(queryReceiptManagerQuery);
-        accountManager.authorizeQuery(sendingResultManagerQuery);
-
         faceManager.setQuery(faceManagerQuery);
         queryReceiptManager.setQuery(queryReceiptManagerQuery);
         sendingResultManager.setQuery(sendingResultManagerQuery);
@@ -84,6 +86,7 @@ public class Executor extends Thread {
         tasks.add(new Task(quickCompletion));
     }
 
+    public void setListLive(QueryDataListLive listLive) {this.listLive = listLive;}
 
     @Override
     public void run() {
@@ -99,33 +102,70 @@ public class Executor extends Thread {
         }
     }
 
+    public void setTokenLive(TokenLive tokenLive) {
+        this.tokenLive = tokenLive;
+    }
 
     public boolean authorize(String username, String password, QueryData accountManagerQuery) {
         accountManager.setQuery(accountManagerQuery);
+        accountManager.setToken(tokenLive);
         accountManager.generateToken(username, password);
-        for (;!accountManager.isHasResponse();) {}
-        return accountManager.getToken().isEmpty();
+
+        synchronized (this) {
+            try {
+                wait();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+
+        Log.i("main test t", tokenLive.getToken());
+
+        if (!tokenLive.getToken().isEmpty()) {
+            /*accountManager.authorizeQuery(faceManagerQuery);
+            accountManager.authorizeQuery(queryReceiptManagerQuery);
+            accountManager.authorizeQuery(sendingResultManagerQuery);*/
+            accountManager.authorizeQuery(faceManager.getQuery());
+            accountManager.authorizeQuery(queryReceiptManager.getQuery());
+            accountManager.authorizeQuery(sendingResultManager.getQuery());
+
+            return true;
+        } else {
+            return false;
+        }
     }
 
     public boolean executeQueries(QuickCompletion quickCompletion) {
         try {
+
             for (;!quickCompletion.isStop();) {
-                Log.i("Executor.executeQueries * start", "start");
+                listLive.clearAll();
+
                 Log.i("Executor.executeQueries * get", "get");
+
+                queryReceiptManager.setData(listLive);
                 queryReceiptManager.run();
-                for (; !queryReceiptManager.isHasResponse(); ) {}
-                List<QueryData> queryDataList = queryReceiptManager.getData();
+
+                synchronized (this) {
+                    wait();
+                }
 
                 Log.i("Executor.executeQueries * run", "run");
-                queryExecutionManager.setData(queryDataList);
+
+                queryExecutionManager.setData(listLive.get());
+                listLive.clearAll();
+                queryExecutionManager.setOutputData(listLive);
                 queryExecutionManager.run();
-                for (; !queryExecutionManager.isDone(); ) {}
+
+                synchronized (this) {
+                    wait();
+                }
 
                 Log.i("Executor.executeQueries * set", "set");
-                sendingResultManager.setData(queryExecutionManager.getData());
+
+                sendingResultManager.setData(listLive.get());
                 sendingResultManager.run();
 
-                Log.i("Executor.executeQueries * finish", "finish");
             }
 
         } catch (Exception e) {
@@ -136,7 +176,6 @@ public class Executor extends Thread {
     }
 
 
-    public String getToken() {return accountManager.getToken();}
 
     public Context getContext() {return context;}
     public AccountManager getAccountManager() {return accountManager;}

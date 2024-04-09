@@ -1,4 +1,4 @@
-package org.grabbing.devicepart.domain;
+package org.grabbing.devicepart.wrappers;
 
 import androidx.annotation.Nullable;
 
