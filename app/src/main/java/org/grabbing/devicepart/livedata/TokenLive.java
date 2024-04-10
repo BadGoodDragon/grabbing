@@ -11,6 +11,11 @@ public class TokenLive extends ViewModel {
     private final MutableLiveData<String> token = new MutableLiveData<>();
     private final MutableLiveData<Boolean> status = new MutableLiveData<>();
 
+    public void clearAll() {
+        token.postValue("");
+        this.status.postValue(false);
+    }
+
     public void setToken(String token) {this.token.postValue(token);}
     public String getToken() {return token.getValue();}
 

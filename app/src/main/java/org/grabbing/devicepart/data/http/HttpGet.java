@@ -25,10 +25,14 @@ public class HttpGet implements HttpQuery {
     private List<QueryData> data;
     private final Context context;
     private Hook hookForArray;
+    private static RequestQueue requestQueue;
 
     public HttpGet(Context context) {
         this.data = null;
         this.context = context;
+        if (requestQueue == null) {
+            requestQueue = Volley.newRequestQueue(context);
+        }
     }
 
     @Override
@@ -44,8 +48,6 @@ public class HttpGet implements HttpQuery {
         if (data == null) {
             throw new RuntimeException("data == null");
         }
-
-        RequestQueue requestQueue = Volley.newRequestQueue(context);
 
         for (int i = 0; i < data.size(); i++) {
             int finalI = i;
@@ -105,7 +107,6 @@ public class HttpGet implements HttpQuery {
     public void runRightAway(QueryData query, Hook hook) {
         Log.i("HttpQuery.HttpGet.runRightAway * start", query.toString());
 
-        RequestQueue requestQueue = Volley.newRequestQueue(context);
         Response.Listener<String> listener = new Response.Listener<String>() {
             @Override
             public void onResponse(String response) {

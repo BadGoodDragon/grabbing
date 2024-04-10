@@ -10,6 +10,7 @@ import org.grabbing.devicepart.data.http.HttpQuery;
 import org.grabbing.devicepart.domain.QueryData;
 import org.grabbing.devicepart.hooks.EmptyHook;
 import org.grabbing.devicepart.hooks.FaceManagerHook;
+import org.grabbing.devicepart.livedata.ListOfUsersLive;
 import org.grabbing.devicepart.wrappers.BooleanWrapper;
 
 import java.util.ArrayList;
@@ -20,8 +21,7 @@ import java.util.Map;
 public class FaceManager {
     private final Context context;
     private QueryData query;
-    private FaceManagerHook hook;
-    private List<String> linkedUsers;
+    private ListOfUsersLive linkedUsers;
 
     public FaceManager(Context context) {
         this.context = context;
@@ -70,7 +70,9 @@ public class FaceManager {
         httpPost.runRightAway(query, new EmptyHook());
     }
 
-    public void getListOfLinkedUsersInit() {
+    public void setLinkedUsers(ListOfUsersLive linkedUsers) {this.linkedUsers = linkedUsers;}
+
+    public void getListOfLinkedUsers() {
         Map<String, String> body = new HashMap<>();
         body.put("type", "getListOfLinkedUsers");
 
@@ -78,20 +80,12 @@ public class FaceManager {
 
         query.setQueryBody(gson.toJson(body));
 
-        linkedUsers = new ArrayList<>();
-        hook = new FaceManagerHook(linkedUsers);
+        FaceManagerHook hook = new FaceManagerHook(linkedUsers);
 
         HttpQuery httpGet = new HttpGet(context);
         httpGet.runRightAway(query, hook);
     }
 
-    public boolean isHasResponse() {
-        return hook.isHasResponse();
-    }
-
-    public List<String> getListOfLinkedUsers() {
-        return linkedUsers;
-    }
 
     public QueryData getQuery() {return query;}
 }

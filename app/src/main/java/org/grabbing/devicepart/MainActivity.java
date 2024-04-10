@@ -10,6 +10,7 @@ import android.widget.Button;
 import android.widget.TextView;
 
 import org.grabbing.devicepart.domain.QueryData;
+import org.grabbing.devicepart.livedata.ListOfUsersLive;
 import org.grabbing.devicepart.livedata.QueryDataListLive;
 import org.grabbing.devicepart.livedata.TokenLive;
 import org.grabbing.devicepart.wrappers.QuickCompletion;
@@ -50,7 +51,7 @@ public class MainActivity extends AppCompatActivity {
         executor.setTask("login", "password", new QueryData("http://94.103.92.242:8090/au", -1));
 
 
-        executor.init(new QueryData("http://94.103.92.242:8090/", -2), new QueryData("http://94.103.92.242:8090/", -3), new QueryData("http://94.103.92.242:8090/ret", -4));
+        executor.init(new QueryData("http://94.103.92.242:8090/ul", -2), new QueryData("http://94.103.92.242:8090/", -3), new QueryData("http://94.103.92.242:8090/ret", -4));
 
 
 
@@ -68,14 +69,30 @@ public class MainActivity extends AppCompatActivity {
 
         executor.setListLive(listLive);
 
+        ListOfUsersLive usersLive = new ListOfUsersLive();
+        usersLive.getStatusLive().observeForever(new Observer<Boolean>() {
+            @Override
+            public void onChanged(Boolean value) {
+                if (value) {
+                    synchronized (executor) {
+                        executor.notify();
+                    }
+                }
+            }
+        });
+
+        executor.setUsersLive(usersLive);
+
         QuickCompletion quickCompletion = new QuickCompletion();
 
         test.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                quickCompletion.setStop(false);
+                /*quickCompletion.setStop(false);
                 executor.setTask(quickCompletion);
-                Log.d("MAIN * on click", "onClick: ");
+                Log.d("MAIN * on click", "onClick: ");*/
+                executor.setTask(2);
+
 
             }
         });
@@ -83,7 +100,8 @@ public class MainActivity extends AppCompatActivity {
         stop.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                quickCompletion.setStop(true);
+                //quickCompletion.setStop(true);
+                textView.setText(usersLive.getListOfUsers().toString());
             }
         });
     }

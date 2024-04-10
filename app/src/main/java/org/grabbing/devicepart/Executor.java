@@ -6,6 +6,7 @@ import android.util.Log;
 import androidx.lifecycle.Observer;
 
 import org.grabbing.devicepart.domain.QueryData;
+import org.grabbing.devicepart.livedata.ListOfUsersLive;
 import org.grabbing.devicepart.livedata.QueryDataListLive;
 import org.grabbing.devicepart.livedata.TokenLive;
 import org.grabbing.devicepart.wrappers.QuickCompletion;
@@ -29,6 +30,7 @@ public class Executor extends Thread {
     private SendingResultManager sendingResultManager;
     private QueryDataListLive listLive;
     private TokenLive tokenLive;
+    private ListOfUsersLive usersLive;
 
     public Executor(Context context) {
         this.context = context;
@@ -69,6 +71,9 @@ public class Executor extends Thread {
             this.quickCompletion = quickCompletion;
             data = 1;
         }
+        public Task(int data) {
+            this.data = data;
+        }
 
         public String getUsername() {return username;}
         public String getPassword() {return password;}
@@ -85,8 +90,15 @@ public class Executor extends Thread {
     public void setTask(QuickCompletion quickCompletion) {
         tasks.add(new Task(quickCompletion));
     }
+    public void setTask(int id) {
+        tasks.add(new Task(id));
+    }
 
     public void setListLive(QueryDataListLive listLive) {this.listLive = listLive;}
+    public void setTokenLive(TokenLive tokenLive) {
+        this.tokenLive = tokenLive;
+    }
+    public void setUsersLive(ListOfUsersLive usersLive) {this.usersLive = usersLive;}
 
     @Override
     public void run() {
@@ -97,16 +109,16 @@ public class Executor extends Thread {
                     authorize(task.getUsername(), task.getPassword(), task.getAccountManagerQuery());
                 } else if (task.data == 1) {
                     executeQueries(task.getQuickCompletion());
+                } else if (task.data == 2) {
+                    getListOfLinkedUsers();
                 }
             }
         }
     }
 
-    public void setTokenLive(TokenLive tokenLive) {
-        this.tokenLive = tokenLive;
-    }
-
     public boolean authorize(String username, String password, QueryData accountManagerQuery) {
+        tokenLive.clearAll();
+
         accountManager.setQuery(accountManagerQuery);
         accountManager.setToken(tokenLive);
         accountManager.generateToken(username, password);
@@ -122,9 +134,6 @@ public class Executor extends Thread {
         Log.i("main test t", tokenLive.getToken());
 
         if (!tokenLive.getToken().isEmpty()) {
-            /*accountManager.authorizeQuery(faceManagerQuery);
-            accountManager.authorizeQuery(queryReceiptManagerQuery);
-            accountManager.authorizeQuery(sendingResultManagerQuery);*/
             accountManager.authorizeQuery(faceManager.getQuery());
             accountManager.authorizeQuery(queryReceiptManager.getQuery());
             accountManager.authorizeQuery(sendingResultManager.getQuery());
@@ -134,8 +143,9 @@ public class Executor extends Thread {
             return false;
         }
     }
-
     public boolean executeQueries(QuickCompletion quickCompletion) {
+        listLive.clearAll();
+
         try {
 
             for (;!quickCompletion.isStop();) {
@@ -166,6 +176,23 @@ public class Executor extends Thread {
                 sendingResultManager.setData(listLive.get());
                 sendingResultManager.run();
 
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+        return true;
+    }
+    public boolean getListOfLinkedUsers() {
+        usersLive.clearAll();
+
+        try {
+            faceManager.setLinkedUsers(usersLive);
+            faceManager.getListOfLinkedUsers();
+
+            synchronized (this) {
+                wait();
             }
 
         } catch (Exception e) {
