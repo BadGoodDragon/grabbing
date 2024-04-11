@@ -8,8 +8,10 @@ import org.grabbing.devicepart.data.http.HttpGet;
 import org.grabbing.devicepart.data.http.HttpPost;
 import org.grabbing.devicepart.data.http.HttpQuery;
 import org.grabbing.devicepart.domain.QueryData;
+import org.grabbing.devicepart.hooks.BooleanHook;
 import org.grabbing.devicepart.hooks.EmptyHook;
 import org.grabbing.devicepart.hooks.FaceManagerHook;
+import org.grabbing.devicepart.livedata.BooleanLive;
 import org.grabbing.devicepart.livedata.ListOfUsersLive;
 import org.grabbing.devicepart.wrappers.BooleanWrapper;
 
@@ -22,12 +24,14 @@ public class FaceManager {
     private final Context context;
     private QueryData query;
     private ListOfUsersLive linkedUsers;
+    private BooleanLive responses;
 
     public FaceManager(Context context) {
         this.context = context;
     }
 
     public void setQuery(QueryData query) {this.query = query;}
+    public void setResponses(BooleanLive responses) {this.responses = responses;}
 
     public void register(String name) {
         Map<String, String> body = new HashMap<>();
@@ -40,7 +44,7 @@ public class FaceManager {
 
         HttpQuery httpPost = new HttpPost(context);
 
-        httpPost.runRightAway(query, new EmptyHook());
+        httpPost.runRightAway(query, new BooleanHook(responses));
 
     }
     public void attach(String username) {
@@ -54,7 +58,7 @@ public class FaceManager {
 
         HttpQuery httpPost = new HttpPost(context);
 
-        httpPost.runRightAway(query, new EmptyHook());
+        httpPost.runRightAway(query, new BooleanHook(responses));
     }
     public void detach(String username) {
         Map<String, String> body = new HashMap<>();
@@ -67,7 +71,7 @@ public class FaceManager {
 
         HttpQuery httpPost = new HttpPost(context);
 
-        httpPost.runRightAway(query, new EmptyHook());
+        httpPost.runRightAway(query, new BooleanHook(responses));
     }
 
     public void setLinkedUsers(ListOfUsersLive linkedUsers) {this.linkedUsers = linkedUsers;}

@@ -7,6 +7,8 @@ import com.google.gson.Gson;
 import org.grabbing.devicepart.data.http.HttpPost;
 import org.grabbing.devicepart.data.http.HttpQuery;
 import org.grabbing.devicepart.domain.QueryData;
+import org.grabbing.devicepart.hooks.BooleanHook;
+import org.grabbing.devicepart.livedata.BooleanLive;
 import org.grabbing.devicepart.livedata.TokenLive;
 import org.grabbing.devicepart.wrappers.StringStorage;
 import org.grabbing.devicepart.hooks.AccountManagerHook;
@@ -18,6 +20,7 @@ import java.util.Map;
 public class AccountManager {
     private final Context context;
     private TokenLive token;
+    private BooleanLive booleanLive;
     private QueryData query;
     private AccountManagerHook hook;
 
@@ -28,6 +31,7 @@ public class AccountManager {
 
     public void setQuery(QueryData query) {this.query = query;}
     public void setToken(TokenLive token) {this.token = token;}
+    public void setBooleanLive(BooleanLive booleanLive) {this.booleanLive = booleanLive;}
     public void setToken(String token) {this.token.setToken(token);}
 
     public void generateToken(String username, String password) {
@@ -49,6 +53,24 @@ public class AccountManager {
         hook = new AccountManagerHook(token);
 
         httpPost.runRightAway(query, hook);
+    }
+    public void register(String username, String password) {
+        Map<String, String> body = new HashMap<>();
+        body.put("type", "register");
+
+        String usernameAndPassword = username + ":" + password;
+
+        Map<String, String> headers = new HashMap<>();
+        headers.put("Authorization", "Basic " + Base64.getEncoder().encodeToString(usernameAndPassword.getBytes()));
+
+        Gson gson = new Gson();
+
+        query.setQueryBody(gson.toJson(body));
+        query.setAuthorizationHeaders(headers);
+
+        HttpQuery httpPost = new HttpPost(context);
+
+        httpPost.runRightAway(query, new BooleanHook(booleanLive));
     }
     public QueryData authorizeQuery(QueryData unauthorizedQuery) {
         Map<String, String> headers = new HashMap<>();

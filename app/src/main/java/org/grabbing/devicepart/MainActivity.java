@@ -10,6 +10,8 @@ import android.widget.Button;
 import android.widget.TextView;
 
 import org.grabbing.devicepart.domain.QueryData;
+import org.grabbing.devicepart.livedata.BooleanLive;
+import org.grabbing.devicepart.livedata.IntegerLive;
 import org.grabbing.devicepart.livedata.ListOfUsersLive;
 import org.grabbing.devicepart.livedata.QueryDataListLive;
 import org.grabbing.devicepart.livedata.TokenLive;
@@ -34,74 +36,85 @@ public class MainActivity extends AppCompatActivity {
         Executor executor = new Executor(getApplicationContext());
         executor.start();
 
-        TokenLive tokenLive = new TokenLive();
-
-        tokenLive.getStatusLive().observeForever(new Observer<Boolean>() {
-            @Override
-            public void onChanged(Boolean value) {
-                if (value) {
-                    synchronized (executor) {
-                        executor.notify();
-                    }
-                }
-            }
-        });
-
-        executor.setTokenLive(tokenLive);
-        executor.setTask("login", "password", new QueryData("http://94.103.92.242:8090/au", -1));
-
-
-        executor.init(new QueryData("http://94.103.92.242:8090/ul", -2), new QueryData("http://94.103.92.242:8090/", -3), new QueryData("http://94.103.92.242:8090/ret", -4));
-
-
-
         QueryDataListLive listLive = new QueryDataListLive();
+        TokenLive tokenLive = new TokenLive();
+        ListOfUsersLive usersLive = new ListOfUsersLive();
+        BooleanLive booleanLive = new BooleanLive();
+        IntegerLive integerLive = new IntegerLive();
         listLive.getStatusLive().observeForever(new Observer<Boolean>() {
             @Override
-            public void onChanged(Boolean value) {
-                if (value) {
-                    synchronized (executor) {
-                        executor.notify();
-                    }
+            public void onChanged(Boolean v) {
+                if (v) {
+                    executor.resumeRunningThread();
                 }
             }
         });
-
-        executor.setListLive(listLive);
-
-        ListOfUsersLive usersLive = new ListOfUsersLive();
+        tokenLive.getStatusLive().observeForever(new Observer<Boolean>() {
+            @Override
+            public void onChanged(Boolean v) {
+                if (v) {
+                    executor.resumeRunningThread();
+                }
+            }
+        });
         usersLive.getStatusLive().observeForever(new Observer<Boolean>() {
             @Override
-            public void onChanged(Boolean value) {
-                if (value) {
-                    synchronized (executor) {
-                        executor.notify();
-                    }
+            public void onChanged(Boolean v) {
+                if (v) {
+                    executor.resumeRunningThread();
+                }
+            }
+        });
+        booleanLive.getStatusLive().observeForever(new Observer<Boolean>() {
+            @Override
+            public void onChanged(Boolean v) {
+                if (v) {
+                    executor.resumeRunningThread();
+                }
+            }
+        });
+        integerLive.getStatusLive().observeForever(new Observer<Boolean>() {
+            @Override
+            public void onChanged(Boolean v) {
+                if (v) {
+                    executor.resumeRunningThread();
                 }
             }
         });
 
         executor.setUsersLive(usersLive);
+        executor.setListLive(listLive);
+        executor.setTokenLive(tokenLive);
+        executor.setBooleanLive(booleanLive);
+        executor.setIntegerLive(integerLive);
+
+        executor.authorize("login", "password", new QueryData("http://94.103.92.242:8090/au", -1));
+
+
+        executor.init(new QueryData("http://94.103.92.242:8090/", -3),
+                new QueryData("http://94.103.92.242:8090/ret", -4),
+                new QueryData("http://94.103.92.242:8090/false", -2),
+                new QueryData("http://94.103.92.242:8090/yes", -5));
+
 
         QuickCompletion quickCompletion = new QuickCompletion();
 
         test.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                /*quickCompletion.setStop(false);
-                executor.setTask(quickCompletion);
-                Log.d("MAIN * on click", "onClick: ");*/
-                executor.setTask(2);
-
-
+                //executor.registerFace("name");
+                quickCompletion.setStop(false);
+                executor.executeQueries(quickCompletion);
+                Log.d("MAIN * on click", "onClick: ");
+                //executor.setTask(2);
             }
         });
 
         stop.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                //quickCompletion.setStop(true);
-                textView.setText(usersLive.getListOfUsers().toString());
+                quickCompletion.setStop(true);
+                //textView.setText(usersLive.getListOfUsers().toString());
             }
         });
     }

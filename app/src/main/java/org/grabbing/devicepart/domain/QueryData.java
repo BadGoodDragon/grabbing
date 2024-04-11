@@ -71,6 +71,7 @@ public class QueryData {
     public String getResponseBody() {return responseBody;}
     public boolean isHasResponse() {return hasResponse;}
     public boolean isError() {return error;}
+    public Map<String, String> getAuthorizationHeaders() {return authorizationHeaders;}
 
     @Override
     public String toString() {
