@@ -22,13 +22,13 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.test0);
+        setContentView(R.layout.main);
 
         //testInitButton();
-        testInitButtonV2();
+        //testInitButtonV2();
     }
 
-    private void testInitButtonV2() {
+    /*private void testInitButtonV2() {
         Button test = findViewById(R.id.test_run);
         Button stop = findViewById(R.id.test_stop);
         TextView textView = findViewById(R.id.test_output);
@@ -117,7 +117,7 @@ public class MainActivity extends AppCompatActivity {
                 //textView.setText(usersLive.getListOfUsers().toString());
             }
         });
-    }
+    }*/
 
     /*private void testInitButton() {
         EditText url = findViewById(R.id.e_url);
