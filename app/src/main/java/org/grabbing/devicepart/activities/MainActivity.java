@@ -1,32 +1,210 @@
-package org.grabbing.devicepart;
+package org.grabbing.devicepart.activities;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.Observer;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
 
-import org.grabbing.devicepart.domain.QueryData;
+import org.grabbing.devicepart.Executor;
+import org.grabbing.devicepart.R;
+import org.grabbing.devicepart.data.storage.LongTermStorage;
+import org.grabbing.devicepart.data.storage.StaticStorage;
 import org.grabbing.devicepart.livedata.BooleanLive;
 import org.grabbing.devicepart.livedata.IntegerLive;
 import org.grabbing.devicepart.livedata.ListOfUsersLive;
 import org.grabbing.devicepart.livedata.QueryDataListLive;
-import org.grabbing.devicepart.livedata.TokenLive;
-import org.grabbing.devicepart.wrappers.QuickCompletion;
+import org.grabbing.devicepart.livedata.StringLive;
+import org.grabbing.devicepart.managers.UIManager;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements ActivitiesActions {
+
+    private Button logIn;
+    private Button register;
+    private Button registerFace;
+    private Button management;
+    private Button start;
+
+    private TextView username;
+    private TextView name;
+    private TextView status;
+
+    private boolean hasToken;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
 
-        //testInitButton();
-        //testInitButtonV2();
+        LongTermStorage.saveToken("token-bbb", this.getApplicationContext());
+
+        logIn = findViewById(R.id.main_button_log_in);
+        register = findViewById(R.id.main_button_register);
+        registerFace = findViewById(R.id.main_button_register_face);
+        management = findViewById(R.id.main_button_management);
+        start = findViewById(R.id.main_button_start_stop);
+
+        username = findViewById(R.id.main_text_username);
+        name = findViewById(R.id.main_text_name);
+        status = findViewById(R.id.main_text_status);
+
+        UIManager.setCurrentActivity(this);
+        UIManager.setMainActivity(this);
+
+        Executor executor = new Executor(this.getApplicationContext());
+
+        initExecutor(executor);
+
+        StaticStorage.setExecutor(executor);
+
+        if (hasToken) {
+            executor.check();
+        } else {
+            username.setText("not authorized");
+            name.setText("not authorized");
+        }
+
+
+
+        logIn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(MainActivity.this, AccountLogInActivity.class);
+                startActivity(intent);
+            }
+        });
+        register.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(MainActivity.this, AccountRegisterActivity.class);
+                startActivity(intent);
+            }
+        });
+        registerFace.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(MainActivity.this, FaceRegisterActivity.class);
+                startActivity(intent);
+            }
+        });
+        management.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(MainActivity.this, FaceManagementActivity.class);
+                startActivity(intent);
+            }
+        });
+
     }
+
+    private void initExecutor(Executor executor) {
+        QueryDataListLive listLive = new QueryDataListLive();
+        StringLive tokenLive = new StringLive();
+        ListOfUsersLive usersLive = new ListOfUsersLive();
+        BooleanLive booleanLive = new BooleanLive();
+        IntegerLive integerLive = new IntegerLive();
+        StringLive stringLive = new StringLive();
+        listLive.getStatusLive().observeForever(new Observer<Boolean>() {
+            @Override
+            public void onChanged(Boolean v) {
+                if (v) {
+                    executor.resumeRunningThread();
+                }
+            }
+        });
+        tokenLive.getStatusLive().observeForever(new Observer<Boolean>() {
+            @Override
+            public void onChanged(Boolean v) {
+                if (v) {
+                    executor.resumeRunningThread();
+                }
+            }
+        });
+        usersLive.getStatusLive().observeForever(new Observer<Boolean>() {
+            @Override
+            public void onChanged(Boolean v) {
+                if (v) {
+                    executor.resumeRunningThread();
+                }
+            }
+        });
+        booleanLive.getStatusLive().observeForever(new Observer<Boolean>() {
+            @Override
+            public void onChanged(Boolean v) {
+                if (v) {
+                    executor.resumeRunningThread();
+                }
+            }
+        });
+        integerLive.getStatusLive().observeForever(new Observer<Boolean>() {
+            @Override
+            public void onChanged(Boolean v) {
+                if (v) {
+                    executor.resumeRunningThread();
+                }
+            }
+        });
+        stringLive.getStatusLive().observeForever(new Observer<Boolean>() {
+            @Override
+            public void onChanged(Boolean v) {
+                if (v) {
+                    executor.resumeRunningThread();
+                }
+            }
+        });
+
+        executor.setUsersLive(usersLive);
+        executor.setListLive(listLive);
+        executor.setTokenLive(tokenLive);
+        executor.setBooleanLive(booleanLive);
+        executor.setIntegerLive(integerLive);
+        executor.setStringLive(stringLive);
+
+
+        executor.init(LongTermStorage.queryReceiptManagerQuery,
+                LongTermStorage.sendingResultManagerQuery,
+                LongTermStorage.faceManagerQuery,
+                LongTermStorage.checkManagerQuery);
+
+        executor.start();
+
+        if (LongTermStorage.hasSavedToken(this.getApplicationContext())) {
+            executor.setToken(LongTermStorage.getToken(this.getApplicationContext()));
+            hasToken = true;
+        } else {
+            hasToken = false;
+        }
+
+    }
+
+    @Override
+    public void finishNow() {}
+
+    @Override
+    public void setError(String error) {
+        Toast.makeText(this.getApplicationContext(), error, Toast.LENGTH_LONG).show();
+    }
+
+    public void setFaceName(String name) {
+        this.name.setText(name);
+    }
+
+    public void setAuthStatus(int n) {
+        if (n == 0) {
+
+        } else if (n == 1) {
+            username.setText(LongTermStorage.getUsername(this.getApplicationContext()));
+            name.setText("not authorized");
+        } else if (n == 3) {
+            username.setText(LongTermStorage.getUsername(this.getApplicationContext()));
+            StaticStorage.getExecutor().getFaceName();
+        }
+    }  
 
     /*private void testInitButtonV2() {
         Button test = findViewById(R.id.test_run);

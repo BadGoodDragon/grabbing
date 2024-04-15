@@ -1,3 +1,31 @@
 <resources>
     <string name="app_name">grabbing-the-device-part</string>
+    <string name="account">Account</string>
+    <string name="username">Username</string>
+    <string name="face">Face</string>
+    <string name="name">Name</string>
+    <string name="management">Management</string>
+    <string name="register">Register</string>
+    <string name="executing_queries">Executing Queries</string>
+    <string name="status">Status</string>
+    <string name="strart">Strart</string>
+    <string name="register_face_register">Register</string>
+    <string name="hint">Name</string>
+    <string name="register_face_register_2">Register</string>
+    <string name="back">Back</string>
+    <string name="account_register_register">Register</string>
+    <string name="account_register_register_2">Register</string>
+    <string name="account_register_back">Back</string>
+    <string name="log_in">Log in</string>
+    <string name="account_log_in_username">Username</string>
+    <string name="account_log_in_password">Password</string>
+    <string name="account_log_in_log_in_2">Log in</string>
+    <string name="account_log_in_back">Back</string>
+    <string name="list_of_linked_users">List of linked users</string>
+    <string name="actions">Actions</string>
+    <string name="attach">Attach</string>
+    <string name="face_management_name">Name</string>
+    <string name="detach">Detach</string>
+    <string name="face_management_back">Back</string>
+    <string name="control">Control</string>
 </resources>

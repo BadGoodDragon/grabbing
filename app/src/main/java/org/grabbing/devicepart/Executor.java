@@ -3,15 +3,15 @@ package org.grabbing.devicepart;
 import android.content.Context;
 import android.util.Log;
 
-import androidx.lifecycle.Observer;
-
+import org.grabbing.devicepart.data.storage.StaticStorage;
 import org.grabbing.devicepart.domain.QueryData;
 import org.grabbing.devicepart.livedata.BooleanLive;
 import org.grabbing.devicepart.livedata.IntegerLive;
 import org.grabbing.devicepart.livedata.ListOfUsersLive;
 import org.grabbing.devicepart.livedata.QueryDataListLive;
-import org.grabbing.devicepart.livedata.TokenLive;
+import org.grabbing.devicepart.livedata.StringLive;
 import org.grabbing.devicepart.managers.CheckManager;
+import org.grabbing.devicepart.managers.UIManager;
 import org.grabbing.devicepart.wrappers.QuickCompletion;
 import org.grabbing.devicepart.managers.AccountManager;
 import org.grabbing.devicepart.managers.FaceManager;
@@ -20,7 +20,6 @@ import org.grabbing.devicepart.managers.QueryReceiptManager;
 import org.grabbing.devicepart.managers.SendingResultManager;
 
 import java.util.LinkedList;
-import java.util.List;
 import java.util.Queue;
 
 public class Executor extends Thread {
@@ -34,10 +33,11 @@ public class Executor extends Thread {
     private CheckManager checkManager;
 
     private QueryDataListLive listLive;
-    private TokenLive tokenLive;
+    private StringLive tokenLive;
     private ListOfUsersLive usersLive;
     private BooleanLive booleanLive;
     private IntegerLive integerLive;
+    private StringLive stringLive;
 
     private Thread runningThread;
     private Queue<Thread> queueUnloadedThreads;
@@ -61,15 +61,22 @@ public class Executor extends Thread {
     }
 
     public void setToken(String token) {
+        accountManager.setToken(tokenLive);
         accountManager.setToken(token);
+
+        accountManager.authorizeQuery(faceManager.getQuery());
+        accountManager.authorizeQuery(queryReceiptManager.getQuery());
+        accountManager.authorizeQuery(sendingResultManager.getQuery());
+        accountManager.authorizeQuery(checkManager.getQuery());
     }
 
 
     public void setListLive(QueryDataListLive listLive) {this.listLive = listLive;}
-    public void setTokenLive(TokenLive tokenLive) {this.tokenLive = tokenLive;}
+    public void setTokenLive(StringLive tokenLive) {this.tokenLive = tokenLive;}
     public void setUsersLive(ListOfUsersLive usersLive) {this.usersLive = usersLive;}
     public void setBooleanLive(BooleanLive booleanLive) {this.booleanLive = booleanLive;}
     public void setIntegerLive(IntegerLive integerLive) {this.integerLive = integerLive;}
+    public void setStringLive(StringLive stringLive) {this.stringLive = stringLive;}
 
     public void resumeRunningThread() {
         synchronized (runningThread) {
@@ -119,6 +126,12 @@ public class Executor extends Thread {
     public void detachFace(String name) {
         queueUnloadedThreads.add(new Thread(() -> detachFaceSync(name)));
     }
+    public void getFaceName() {
+        queueUnloadedThreads.add(new Thread(() -> getFaceNameSync()));
+    }
+    public void check() {
+        queueUnloadedThreads.add(new Thread(() -> checkSync()));
+    }
 
     public boolean authorizeSync(String username, String password, QueryData accountManagerQuery) {
         Log.i("authorizeSync", "start");
@@ -141,10 +154,10 @@ public class Executor extends Thread {
         Log.i("authorizeSync", "wake up");
 
 
-        Log.i("main test t", tokenLive.getToken());
+        Log.i("main test t", tokenLive.getData());
 
         Log.i("END", "END");
-        if (!tokenLive.getToken().isEmpty()) {
+        if (!tokenLive.getData().isEmpty()) {
             accountManager.authorizeQuery(faceManager.getQuery());
             accountManager.authorizeQuery(queryReceiptManager.getQuery());
             accountManager.authorizeQuery(sendingResultManager.getQuery());
@@ -332,294 +345,51 @@ public class Executor extends Thread {
         }
         return true;
     }
-}
+    public boolean getFaceNameSync(){
+        Log.i("TAG", "run");
 
-/*public class Executor extends Thread {
-    private final Context context;
+        stringLive.clearAll();
 
-    private AccountManager accountManager;
-    private FaceManager faceManager;
-    private QueryExecutionManager queryExecutionManager;
-    private QueryReceiptManager queryReceiptManager;
-    private SendingResultManager sendingResultManager;
+        faceManager.setStringLive(stringLive);
+        faceManager.getCurrentName();
 
-    private QueryDataListLive listLive;
-    private TokenLive tokenLive;
-    private ListOfUsersLive usersLive;
-    private BooleanLive booleanLive;
-
-    public Executor(Context context) {
-        this.context = context;
-        accountManager = new AccountManager(context);
-        faceManager = new FaceManager(context);
-        queryExecutionManager = new QueryExecutionManager(context);
-        queryReceiptManager = new QueryReceiptManager(context);
-        sendingResultManager = new SendingResultManager(context);
-        tasks = new LinkedList<>();
-    }
-
-
-    public void setToken(String token) {
-        accountManager.setToken(token);
-    }
-
-    public void init(QueryData faceManagerQuery, QueryData queryReceiptManagerQuery, QueryData sendingResultManagerQuery) {
-        faceManager.setQuery(faceManagerQuery);
-        queryReceiptManager.setQuery(queryReceiptManagerQuery);
-        sendingResultManager.setQuery(sendingResultManagerQuery);
-    }
-
-
-    public class Task {
-        private String username;
-        private String password;
-        private QueryData accountManagerQuery;
-        private QuickCompletion quickCompletion;
-        private int data;
-
-        public Task(String username, String password, QueryData accountManagerQuery) {
-            this.username = username;
-            this.password = password;
-            this.accountManagerQuery = accountManagerQuery;
-            data = 0;
-        }
-        public Task(QuickCompletion quickCompletion) {
-            this.quickCompletion = quickCompletion;
-            data = 1;
-        }
-        public Task(int data) {
-            this.data = data;
-        }
-        public Task(String username, String password) {
-            this.username = username;
-            this.password = password;
-            data = 3;
-        }
-
-        public String getUsername() {return username;}
-        public String getPassword() {return password;}
-        public QueryData getAccountManagerQuery() {return accountManagerQuery;}
-        public QuickCompletion getQuickCompletion() {return quickCompletion;}
-        public int getData() {return data;}
-    }
-
-    private Queue<Task> tasks;
-
-    public void setTask(String username, String password, QueryData accountManagerQuery) {
-        tasks.add(new Task(username, password, accountManagerQuery));
-    }
-    public void setTask(QuickCompletion quickCompletion) {
-        tasks.add(new Task(quickCompletion));
-    }
-    public void setTask(int id) {
-        tasks.add(new Task(id));
-    }
-    public void setTask(String username, String password) {
-        tasks.add(new Task(username, password));
-    }
-    public void setTask(String name, int id) {
-
-    }
-
-
-    public void setListLive(QueryDataListLive listLive) {this.listLive = listLive;}
-    public void setTokenLive(TokenLive tokenLive) {
-        this.tokenLive = tokenLive;
-    }
-    public void setUsersLive(ListOfUsersLive usersLive) {this.usersLive = usersLive;}
-
-
-    @Override
-    public void run() {
-        for (;;) {
-            if (!tasks.isEmpty()) {
-                Task task = tasks.poll();
-                if (task.data == 0) {
-                    authorize(task.getUsername(), task.getPassword(), task.getAccountManagerQuery());
-                } else if (task.data == 1) {
-                    executeQueries(task.getQuickCompletion());
-                } else if (task.data == 2) {
-                    getListOfLinkedUsers();
-                } else if (task.data == 3) {
-
-                }
-            }
-        }
-    }
-
-    public boolean authorize(String username, String password, QueryData accountManagerQuery) {
-        tokenLive.clearAll();
-
-        accountManager.setQuery(accountManagerQuery);
-        accountManager.setToken(tokenLive);
-        accountManager.generateToken(username, password);
-
-        synchronized (this) {
+        synchronized (runningThread) {
+            Log.i("TAG", "run");
             try {
-                wait();
+                runningThread.wait();
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
         }
 
-        Log.i("main test t", tokenLive.getToken());
+        Log.i("TAG", "run");
+        if (!stringLive.getData().isEmpty()) {
 
-        if (!tokenLive.getToken().isEmpty()) {
-            accountManager.authorizeQuery(faceManager.getQuery());
-            accountManager.authorizeQuery(queryReceiptManager.getQuery());
-            accountManager.authorizeQuery(sendingResultManager.getQuery());
+            Log.i("TAG", "!isEmpty");
+
+            UIManager.getMainActivity().setFaceName(stringLive.getData());
 
             return true;
         } else {
+            UIManager.getCurrentActivity().setError("error");
             return false;
         }
     }
-    public boolean executeQueries(QuickCompletion quickCompletion) {
-        listLive.clearAll();
-
-        try {
-
-            for (;!quickCompletion.isStop();) {
-                listLive.clearAll();
-
-                Log.i("Executor.executeQueries * get", "get");
-
-                queryReceiptManager.setData(listLive);
-                queryReceiptManager.run();
-
-                synchronized (this) {
-                    wait();
-                }
-
-                Log.i("Executor.executeQueries * run", "run");
-
-                queryExecutionManager.setData(listLive.get());
-                listLive.clearAll();
-                queryExecutionManager.setOutputData(listLive);
-                queryExecutionManager.run();
-
-                synchronized (this) {
-                    wait();
-                }
-
-                Log.i("Executor.executeQueries * set", "set");
-
-                sendingResultManager.setData(listLive.get());
-                sendingResultManager.run();
-
+    public boolean checkSync() {
+        checkManager.setIntegerLive(integerLive);
+        checkManager.check();
+        synchronized (runningThread) {
+            try {
+                runningThread.wait();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+                return false;
             }
-
-        } catch (Exception e) {
-            e.printStackTrace();
-            return false;
         }
+
+        UIManager.getMainActivity().setAuthStatus(integerLive.getData());
+
         return true;
     }
-    public boolean getListOfLinkedUsers() {
-        usersLive.clearAll();
-
-        try {
-            faceManager.setLinkedUsers(usersLive);
-            faceManager.getListOfLinkedUsers();
-
-            synchronized (this) {
-                wait();
-            }
-
-            //TODO: use data
-        } catch (Exception e) {
-            e.printStackTrace();
-            return false;
-        }
-        return true;
-    }
-    public boolean registerAccount(String username, String password) {
-        booleanLive.clearAll();
-
-        try {
-            accountManager.setBooleanLive(booleanLive);
-            accountManager.register(username, password);
-
-            synchronized (this) {
-                wait();
-            }
-
-            //TODO: use data
-        } catch (Exception e) {
-            e.printStackTrace();
-            return false;
-        }
-        return true;
-    }
-    public boolean registerFace(String name) {
-        booleanLive.clearAll();
-
-        try {
-            faceManager.setResponses(booleanLive);
-            faceManager.register(name);
-
-            synchronized (this) {
-                wait();
-            }
-
-            //TODO: use data
-        } catch (Exception e) {
-            e.printStackTrace();
-            return false;
-        }
-        return true;
-    }
-    public boolean attachFace(String name) {
-        booleanLive.clearAll();
-
-        try {
-            faceManager.setResponses(booleanLive);
-            faceManager.attach(name);
-
-            synchronized (this) {
-                wait();
-            }
-
-            //TODO: use data
-        } catch (Exception e) {
-            e.printStackTrace();
-            return false;
-        }
-        return true;
-    }
-    public boolean detachFace(String name) {
-        booleanLive.clearAll();
-
-        try {
-            faceManager.setResponses(booleanLive);
-            faceManager.detach(name);
-
-            synchronized (this) {
-                wait();
-            }
-
-            //TODO: use data
-        } catch (Exception e) {
-            e.printStackTrace();
-            return false;
-        }
-        return true;
-    }
-
-
-
-
-    public Context getContext() {return context;}
-    public AccountManager getAccountManager() {return accountManager;}
-    public FaceManager getFaceManager() {return faceManager;}
-    public QueryExecutionManager getQueryExecutionManager() {return queryExecutionManager;}
-    public QueryReceiptManager getQueryReceiptManager() {return queryReceiptManager;}
-    public SendingResultManager getSendingResultManager() {return sendingResultManager;}
-
-    public void setAccountManager(AccountManager accountManager) {this.accountManager = accountManager;}
-    public void setFaceManager(FaceManager faceManager) {this.faceManager = faceManager;}
-    public void setQueryExecutionManager(QueryExecutionManager queryExecutionManager) {this.queryExecutionManager = queryExecutionManager;}
-    public void setQueryReceiptManager(QueryReceiptManager queryReceiptManager) {this.queryReceiptManager = queryReceiptManager;}
-    public void setSendingResultManager(SendingResultManager sendingResultManager) {this.sendingResultManager = sendingResultManager;}
-}*/
+}
 

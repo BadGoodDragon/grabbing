@@ -1,6 +1,7 @@
 package org.grabbing.devicepart.managers;
 
 import android.content.Context;
+import android.util.Log;
 
 import com.google.gson.Gson;
 
@@ -9,8 +10,7 @@ import org.grabbing.devicepart.data.http.HttpQuery;
 import org.grabbing.devicepart.domain.QueryData;
 import org.grabbing.devicepart.hooks.BooleanHook;
 import org.grabbing.devicepart.livedata.BooleanLive;
-import org.grabbing.devicepart.livedata.TokenLive;
-import org.grabbing.devicepart.wrappers.StringStorage;
+import org.grabbing.devicepart.livedata.StringLive;
 import org.grabbing.devicepart.hooks.AccountManagerHook;
 
 import java.util.Base64;
@@ -19,7 +19,7 @@ import java.util.Map;
 
 public class AccountManager {
     private final Context context;
-    private TokenLive token;
+    private StringLive token;
     private BooleanLive booleanLive;
     private QueryData query;
     private AccountManagerHook hook;
@@ -30,9 +30,9 @@ public class AccountManager {
     }
 
     public void setQuery(QueryData query) {this.query = query;}
-    public void setToken(TokenLive token) {this.token = token;}
+    public void setToken(StringLive token) {this.token = token;}
     public void setBooleanLive(BooleanLive booleanLive) {this.booleanLive = booleanLive;}
-    public void setToken(String token) {this.token.setToken(token);}
+    public void setToken(String token) {this.token.setData(token);}
 
     public void generateToken(String username, String password) {
         Map<String, String> body = new HashMap<>();
@@ -74,7 +74,7 @@ public class AccountManager {
     }
     public QueryData authorizeQuery(QueryData unauthorizedQuery) {
         Map<String, String> headers = new HashMap<>();
-        headers.put("Authorization", "Bearer " + token.getToken());
+        headers.put("Authorization", "Bearer " + token.getData());
 
         unauthorizedQuery.setAuthorizationHeaders(headers);
 

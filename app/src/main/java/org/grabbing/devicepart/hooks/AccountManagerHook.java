@@ -3,20 +3,19 @@ package org.grabbing.devicepart.hooks;
 import android.util.Log;
 
 import org.grabbing.devicepart.domain.QueryData;
-import org.grabbing.devicepart.livedata.TokenLive;
-import org.grabbing.devicepart.wrappers.StringStorage;
+import org.grabbing.devicepart.livedata.StringLive;
 
 public class AccountManagerHook implements Hook {
-    private TokenLive token;
+    private StringLive token;
 
-    public AccountManagerHook(TokenLive token) {
+    public AccountManagerHook(StringLive token) {
         this.token = token;
     }
 
     @Override
     public void capture(QueryData query) {
         Log.i("Hook.AccountManagerGetTokenHook.capture * start", query.toString());
-        token.setToken(query.getResponseBody());
+        token.setData(query.getResponseBody());
         token.setStatus(true);
     }
 }

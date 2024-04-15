@@ -11,8 +11,10 @@ import org.grabbing.devicepart.domain.QueryData;
 import org.grabbing.devicepart.hooks.BooleanHook;
 import org.grabbing.devicepart.hooks.EmptyHook;
 import org.grabbing.devicepart.hooks.FaceManagerHook;
+import org.grabbing.devicepart.hooks.StringHook;
 import org.grabbing.devicepart.livedata.BooleanLive;
 import org.grabbing.devicepart.livedata.ListOfUsersLive;
+import org.grabbing.devicepart.livedata.StringLive;
 import org.grabbing.devicepart.wrappers.BooleanWrapper;
 
 import java.util.ArrayList;
@@ -25,6 +27,7 @@ public class FaceManager {
     private QueryData query;
     private ListOfUsersLive linkedUsers;
     private BooleanLive responses;
+    private StringLive stringLive;
 
     public FaceManager(Context context) {
         this.context = context;
@@ -32,6 +35,7 @@ public class FaceManager {
 
     public void setQuery(QueryData query) {this.query = query;}
     public void setResponses(BooleanLive responses) {this.responses = responses;}
+    public void setStringLive(StringLive stringLive) {this.stringLive = stringLive;}
 
     public void register(String name) {
         Map<String, String> body = new HashMap<>();
@@ -72,6 +76,19 @@ public class FaceManager {
         HttpQuery httpPost = new HttpPost(context);
 
         httpPost.runRightAway(query, new BooleanHook(responses));
+    }
+
+    public void getCurrentName() {
+        Map<String, String> body = new HashMap<>();
+        body.put("type", "getCurrentName");
+
+        Gson gson = new Gson();
+
+        query.setQueryBody(gson.toJson(body));
+
+        HttpQuery httpPost = new HttpPost(context);
+
+        httpPost.runRightAway(query, new StringHook(stringLive));
     }
 
     public void setLinkedUsers(ListOfUsersLive linkedUsers) {this.linkedUsers = linkedUsers;}
