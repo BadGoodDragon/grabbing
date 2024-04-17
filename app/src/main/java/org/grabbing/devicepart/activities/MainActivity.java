@@ -34,14 +34,16 @@ public class MainActivity extends AppCompatActivity implements ActivitiesActions
     private TextView name;
     private TextView status;
 
+    private int code = -1;
+    private String faceName = "not authorized";
+
+
     private boolean hasToken;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
-
-        LongTermStorage.saveToken("token-bbb", this.getApplicationContext());
 
         logIn = findViewById(R.id.main_button_log_in);
         register = findViewById(R.id.main_button_register);
@@ -62,7 +64,9 @@ public class MainActivity extends AppCompatActivity implements ActivitiesActions
 
         StaticStorage.setExecutor(executor);
 
-        if (hasToken) {
+        if (LongTermStorage.hasSavedToken(this.getApplicationContext())) {
+            executor.setToken(LongTermStorage.getToken(this.getApplicationContext()));
+            Log.i("token", LongTermStorage.getToken(this.getApplicationContext()));
             executor.check();
         } else {
             username.setText("not authorized");
@@ -166,19 +170,13 @@ public class MainActivity extends AppCompatActivity implements ActivitiesActions
         executor.setStringLive(stringLive);
 
 
-        executor.init(LongTermStorage.queryReceiptManagerQuery,
+        executor.init(LongTermStorage.accountQuery,
+                LongTermStorage.queryReceiptManagerQuery,
                 LongTermStorage.sendingResultManagerQuery,
                 LongTermStorage.faceManagerQuery,
                 LongTermStorage.checkManagerQuery);
 
         executor.start();
-
-        if (LongTermStorage.hasSavedToken(this.getApplicationContext())) {
-            executor.setToken(LongTermStorage.getToken(this.getApplicationContext()));
-            hasToken = true;
-        } else {
-            hasToken = false;
-        }
 
     }
 
@@ -191,222 +189,49 @@ public class MainActivity extends AppCompatActivity implements ActivitiesActions
     }
 
     public void setFaceName(String name) {
-        this.name.setText(name);
+        runOnUiThread(new Thread() {
+            @Override
+            public void run() {
+                MainActivity.this.name.setText(name);
+            }
+        });
     }
 
     public void setAuthStatus(int n) {
         if (n == 0) {
-
+            runOnUiThread(new Thread() {
+                @Override
+                public void run() {
+                    username.setText("not authorized");
+                    name.setText("not authorized");
+                }
+            });
         } else if (n == 1) {
-            username.setText(LongTermStorage.getUsername(this.getApplicationContext()));
-            name.setText("not authorized");
+            runOnUiThread(new Thread() {
+                @Override
+                public void run() {
+                    username.setText(LongTermStorage.getUsername(MainActivity.this.getApplicationContext()));
+                    name.setText("not authorized");
+                }
+            });
         } else if (n == 3) {
-            username.setText(LongTermStorage.getUsername(this.getApplicationContext()));
+            runOnUiThread(new Thread() {
+                @Override
+                public void run() {
+                    username.setText(LongTermStorage.getUsername(MainActivity.this.getApplicationContext()));
+                    name.setText("loading...");
+                }
+            });
             StaticStorage.getExecutor().getFaceName();
         }
-    }  
+    }
 
-    /*private void testInitButtonV2() {
-        Button test = findViewById(R.id.test_run);
-        Button stop = findViewById(R.id.test_stop);
-        TextView textView = findViewById(R.id.test_output);
+    public void setToken(String token) {
+        LongTermStorage.saveToken(token, this.getApplicationContext());
+    }
 
-        Executor executor = new Executor(getApplicationContext());
-        executor.start();
+    public void update() {
+        StaticStorage.getExecutor().check();
+    }
 
-        QueryDataListLive listLive = new QueryDataListLive();
-        TokenLive tokenLive = new TokenLive();
-        ListOfUsersLive usersLive = new ListOfUsersLive();
-        BooleanLive booleanLive = new BooleanLive();
-        IntegerLive integerLive = new IntegerLive();
-        listLive.getStatusLive().observeForever(new Observer<Boolean>() {
-            @Override
-            public void onChanged(Boolean v) {
-                if (v) {
-                    executor.resumeRunningThread();
-                }
-            }
-        });
-        tokenLive.getStatusLive().observeForever(new Observer<Boolean>() {
-            @Override
-            public void onChanged(Boolean v) {
-                if (v) {
-                    executor.resumeRunningThread();
-                }
-            }
-        });
-        usersLive.getStatusLive().observeForever(new Observer<Boolean>() {
-            @Override
-            public void onChanged(Boolean v) {
-                if (v) {
-                    executor.resumeRunningThread();
-                }
-            }
-        });
-        booleanLive.getStatusLive().observeForever(new Observer<Boolean>() {
-            @Override
-            public void onChanged(Boolean v) {
-                if (v) {
-                    executor.resumeRunningThread();
-                }
-            }
-        });
-        integerLive.getStatusLive().observeForever(new Observer<Boolean>() {
-            @Override
-            public void onChanged(Boolean v) {
-                if (v) {
-                    executor.resumeRunningThread();
-                }
-            }
-        });
-
-        executor.setUsersLive(usersLive);
-        executor.setListLive(listLive);
-        executor.setTokenLive(tokenLive);
-        executor.setBooleanLive(booleanLive);
-        executor.setIntegerLive(integerLive);
-
-        executor.authorize("login", "password", new QueryData("http://94.103.92.242:8090/au", -1));
-
-
-        executor.init(new QueryData("http://94.103.92.242:8090/", -3),
-                new QueryData("http://94.103.92.242:8090/ret", -4),
-                new QueryData("http://94.103.92.242:8090/false", -2),
-                new QueryData("http://94.103.92.242:8090/yes", -5));
-
-
-        QuickCompletion quickCompletion = new QuickCompletion();
-
-        test.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                //executor.registerFace("name");
-                quickCompletion.setStop(false);
-                executor.executeQueries(quickCompletion);
-                Log.d("MAIN * on click", "onClick: ");
-                //executor.setTask(2);
-            }
-        });
-
-        stop.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                quickCompletion.setStop(true);
-                //textView.setText(usersLive.getListOfUsers().toString());
-            }
-        });
-    }*/
-
-    /*private void testInitButton() {
-        EditText url = findViewById(R.id.e_url);
-        EditText login = findViewById(R.id.e_login);
-        EditText password = findViewById(R.id.e_password);
-        EditText token = findViewById(R.id.e_token);
-        EditText name = findViewById(R.id.e_name);
-        EditText username = findViewById(R.id.e_username);
-
-        Button getToken = findViewById(R.id.b_get_token);
-        Button useToken = findViewById(R.id.b_use_token);
-        Button register = findViewById(R.id.b_register);
-        Button attach = findViewById(R.id.b_attach);
-        Button detach = findViewById(R.id.b_detach);
-        Button get = findViewById(R.id.b_get);
-        Button run = findViewById(R.id.b_run);
-        Button set = findViewById(R.id.b_set);
-
-        TextView console = findViewById(R.id.console);
-
-        AccountManager accountManager = new AccountManager(getApplicationContext());
-        FaceManager faceManager = new FaceManager(getApplicationContext());
-        QueryExecutionManager queryExecutionManager = new QueryExecutionManager(getApplicationContext());
-        QueryReceiptManager queryReceiptManager = new QueryReceiptManager(getApplicationContext());
-        SendingResultManager sendingResultManager = new SendingResultManager(getApplicationContext());
-
-        getToken.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                QueryData queryData = new QueryData(url.getText().toString(), -1);
-                accountManager.setQuery(queryData);
-
-                accountManager.generateToken(login.getText().toString(), password.getText().toString());
-            }
-        });
-
-
-        useToken.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                //accountManager.setToken(token.getText().toString());
-                Log.i("token", accountManager.getToken());
-                console.setText(accountManager.getToken());
-            }
-        });
-
-        register.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                QueryData queryData = new QueryData(url.getText().toString(), -1);
-                accountManager.authorizeQuery(queryData);
-                faceManager.setQuery(queryData);
-
-                faceManager.register(name.getText().toString());
-            }
-        });
-        attach.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                QueryData queryData = new QueryData(url.getText().toString(), -1);
-                accountManager.authorizeQuery(queryData);
-                faceManager.setQuery(queryData);
-
-                faceManager.attach(username.getText().toString());
-            }
-        });
-        detach.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                QueryData queryData = new QueryData(url.getText().toString(), -1);
-                accountManager.authorizeQuery(queryData);
-                faceManager.setQuery(queryData);
-
-                faceManager.detach(username.getText().toString());
-            }
-        });
-
-        final List<QueryData>[] queryDataList = new List[]{new ArrayList<>()};
-
-        get.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                QueryData queryData = new QueryData(url.getText().toString(), -1);
-                accountManager.authorizeQuery(queryData);
-                queryReceiptManager.setQuery(queryData);
-
-                queryReceiptManager.run();
-
-
-            }
-        });
-
-        run.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                queryExecutionManager.setData(queryReceiptManager.getData());
-                queryExecutionManager.run();
-                queryDataList[0] = queryExecutionManager.getData();
-            }
-        });
-        set.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                QueryData queryData = new QueryData(url.getText().toString(), -1);
-                accountManager.authorizeQuery(queryData);
-                sendingResultManager.setQuery(queryData);
-
-                sendingResultManager.setData(queryDataList[0]);
-                sendingResultManager.run();
-            }
-        });
-
-    }*/
 }

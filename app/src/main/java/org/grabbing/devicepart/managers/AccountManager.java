@@ -32,7 +32,10 @@ public class AccountManager {
     public void setQuery(QueryData query) {this.query = query;}
     public void setToken(StringLive token) {this.token = token;}
     public void setBooleanLive(BooleanLive booleanLive) {this.booleanLive = booleanLive;}
-    public void setToken(String token) {this.token.setData(token);}
+    public void setToken(String token) {
+        this.token.setData(token);
+        this.token.setStatus(true);
+    }
 
     public void generateToken(String username, String password) {
         Map<String, String> body = new HashMap<>();
@@ -47,6 +50,7 @@ public class AccountManager {
 
         query.setQueryBody(gson.toJson(body));
         query.setAuthorizationHeaders(headers);
+        query.setUrl(query.getUrl() + "/generatetoken");
 
         HttpQuery httpPost = new HttpPost(context);
 
@@ -67,6 +71,7 @@ public class AccountManager {
 
         query.setQueryBody(gson.toJson(body));
         query.setAuthorizationHeaders(headers);
+        query.setUrl(query.getUrl() + "/generatetoken");
 
         HttpQuery httpPost = new HttpPost(context);
 
@@ -75,6 +80,15 @@ public class AccountManager {
     public QueryData authorizeQuery(QueryData unauthorizedQuery) {
         Map<String, String> headers = new HashMap<>();
         headers.put("Authorization", "Bearer " + token.getData());
+
+        unauthorizedQuery.setAuthorizationHeaders(headers);
+
+        return unauthorizedQuery;
+    }
+
+    public static QueryData authorizeQuery(QueryData unauthorizedQuery, String token) {
+        Map<String, String> headers = new HashMap<>();
+        headers.put("Authorization", "Bearer " + token);
 
         unauthorizedQuery.setAuthorizationHeaders(headers);
 

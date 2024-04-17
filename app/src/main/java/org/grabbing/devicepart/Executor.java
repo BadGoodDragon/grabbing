@@ -3,6 +3,7 @@ package org.grabbing.devicepart;
 import android.content.Context;
 import android.util.Log;
 
+import org.grabbing.devicepart.data.storage.LongTermStorage;
 import org.grabbing.devicepart.data.storage.StaticStorage;
 import org.grabbing.devicepart.domain.QueryData;
 import org.grabbing.devicepart.livedata.BooleanLive;
@@ -53,7 +54,8 @@ public class Executor extends Thread {
         queueUnloadedThreads = new LinkedList<>();
     }
 
-    public void init(QueryData queryReceiptManagerQuery, QueryData sendingResultManagerQuery, QueryData faceManagerQuery, QueryData checkManagerQuery) {
+    public void init(QueryData accountManagerQuery, QueryData queryReceiptManagerQuery, QueryData sendingResultManagerQuery, QueryData faceManagerQuery, QueryData checkManagerQuery) {
+        accountManager.setQuery(accountManagerQuery);
         faceManager.setQuery(faceManagerQuery);
         queryReceiptManager.setQuery(queryReceiptManagerQuery);
         sendingResultManager.setQuery(sendingResultManagerQuery);
@@ -61,13 +63,10 @@ public class Executor extends Thread {
     }
 
     public void setToken(String token) {
-        accountManager.setToken(tokenLive);
-        accountManager.setToken(token);
-
-        accountManager.authorizeQuery(faceManager.getQuery());
-        accountManager.authorizeQuery(queryReceiptManager.getQuery());
-        accountManager.authorizeQuery(sendingResultManager.getQuery());
-        accountManager.authorizeQuery(checkManager.getQuery());
+        AccountManager.authorizeQuery(faceManager.getQuery(), token);
+        AccountManager.authorizeQuery(queryReceiptManager.getQuery(), token);
+        AccountManager.authorizeQuery(sendingResultManager.getQuery(), token);
+        AccountManager.authorizeQuery(checkManager.getQuery(), token);
     }
 
 
@@ -105,8 +104,8 @@ public class Executor extends Thread {
         }
     }
 
-    public void authorize(String username, String password, QueryData accountManagerQuery) {
-        queueUnloadedThreads.add(new Thread(() -> authorizeSync(username, password, accountManagerQuery)));
+    public void authorize(String username, String password) {
+        queueUnloadedThreads.add(new Thread(() -> authorizeSync(username, password)));
     }
     public void executeQueries(QuickCompletion quickCompletion) {
         queueUnloadedThreads.add(new Thread(() -> executeQueriesSync(quickCompletion)));
@@ -133,16 +132,13 @@ public class Executor extends Thread {
         queueUnloadedThreads.add(new Thread(() -> checkSync()));
     }
 
-    public boolean authorizeSync(String username, String password, QueryData accountManagerQuery) {
-        Log.i("authorizeSync", "start");
 
+
+    public boolean authorizeSync(String username, String password) {
         tokenLive.clearAll();
-        Log.i("authorizeSync", "clear");
 
-        accountManager.setQuery(accountManagerQuery);
         accountManager.setToken(tokenLive);
         accountManager.generateToken(username, password);
-        Log.i("authorizeSync", "generate");
 
         synchronized (runningThread) {
             try {
@@ -151,20 +147,23 @@ public class Executor extends Thread {
                 e.printStackTrace();
             }
         }
-        Log.i("authorizeSync", "wake up");
 
 
-        Log.i("main test t", tokenLive.getData());
-
-        Log.i("END", "END");
         if (!tokenLive.getData().isEmpty()) {
             accountManager.authorizeQuery(faceManager.getQuery());
             accountManager.authorizeQuery(queryReceiptManager.getQuery());
             accountManager.authorizeQuery(sendingResultManager.getQuery());
             accountManager.authorizeQuery(checkManager.getQuery());
 
+            UIManager.dataTransmission("token", tokenLive.getData());
+
+            LongTermStorage.saveToken(tokenLive.getData(), context);
+            UIManager.nextStep();
+
             return true;
         } else {
+            UIManager.setError("authorization error");
+
             return false;
         }
     }
@@ -200,11 +199,7 @@ public class Executor extends Thread {
                 queryReceiptManager.run();
 
                 synchronized (runningThread) {
-                    try {
-                        runningThread.wait();
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
+                    runningThread.wait();
                 }
 
                 Log.i("Executor.executeQueries * run", "run");
@@ -215,11 +210,7 @@ public class Executor extends Thread {
                 queryExecutionManager.run();
 
                 synchronized (runningThread) {
-                    try {
-                        runningThread.wait();
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
+                    runningThread.wait();
                 }
 
                 Log.i("Executor.executeQueries * set", "set");
@@ -269,12 +260,19 @@ public class Executor extends Thread {
                     runningThread.wait();
                 } catch (InterruptedException e) {
                     e.printStackTrace();
+                    UIManager.setError("register error");
                 }
             }
 
-            //TODO: use data
+            if (booleanLive.getData()) {
+                UIManager.nextStep();
+            } else {
+                UIManager.setError("register error");
+            }
+
         } catch (Exception e) {
             e.printStackTrace();
+            UIManager.setError("register error");
             return false;
         }
         return true;
@@ -287,17 +285,17 @@ public class Executor extends Thread {
             faceManager.register(name);
 
             synchronized (runningThread) {
-                try {
-                    runningThread.wait();
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
+                runningThread.wait();
             }
 
-            Log.i("registerFaceSync", String.valueOf(booleanLive.getData()));
-            //TODO: use data
+            if (booleanLive.getData()) {
+                UIManager.nextStep();
+            } else {
+                UIManager.setError("register error");
+            }
         } catch (Exception e) {
             e.printStackTrace();
+            UIManager.setError("register error");
             return false;
         }
         return true;
@@ -346,15 +344,12 @@ public class Executor extends Thread {
         return true;
     }
     public boolean getFaceNameSync(){
-        Log.i("TAG", "run");
-
         stringLive.clearAll();
 
         faceManager.setStringLive(stringLive);
         faceManager.getCurrentName();
 
         synchronized (runningThread) {
-            Log.i("TAG", "run");
             try {
                 runningThread.wait();
             } catch (InterruptedException e) {
@@ -362,16 +357,16 @@ public class Executor extends Thread {
             }
         }
 
-        Log.i("TAG", "run");
         if (!stringLive.getData().isEmpty()) {
 
             Log.i("TAG", "!isEmpty");
 
-            UIManager.getMainActivity().setFaceName(stringLive.getData());
+            //UIManager.getMainActivity().setFaceName(stringLive.getData());
+            UIManager.dataTransmission("face name", stringLive.getData());
 
             return true;
         } else {
-            UIManager.getCurrentActivity().setError("error");
+            UIManager.setError("error");
             return false;
         }
     }
@@ -387,7 +382,8 @@ public class Executor extends Thread {
             }
         }
 
-        UIManager.getMainActivity().setAuthStatus(integerLive.getData());
+        //UIManager.getMainActivity().setAuthStatus(integerLive.getData());
+        UIManager.dataTransmission("authorization status", integerLive.getData());
 
         return true;
     }

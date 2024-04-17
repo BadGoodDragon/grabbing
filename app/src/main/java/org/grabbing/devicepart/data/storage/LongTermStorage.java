@@ -6,10 +6,11 @@ import android.content.SharedPreferences;
 import org.grabbing.devicepart.domain.QueryData;
 
 public class LongTermStorage {
-    public static final QueryData queryReceiptManagerQuery = new QueryData("http://94.103.92.242:8090/", -2);
-    public static final QueryData sendingResultManagerQuery = new QueryData("http://94.103.92.242:8090/ret", -3);
-    public static final QueryData faceManagerQuery = new QueryData("http://94.103.92.242:8090/false", -4);
-    public static final QueryData checkManagerQuery = new QueryData("http://94.103.92.242:8090/yes", -5);
+    public static final QueryData queryReceiptManagerQuery = new QueryData("http://94.103.92.242:8090/receivingqueries", -2);
+    public static final QueryData sendingResultManagerQuery = new QueryData("http://94.103.92.242:8090/returningresults", -3);
+    public static final QueryData faceManagerQuery = new QueryData("http://94.103.92.242:8090/facemanagement", -4);
+    public static final QueryData checkManagerQuery = new QueryData("http://94.103.92.242:8090/checkmanagement", -5);
+    public static final QueryData accountQuery = new QueryData("http://94.103.92.242:8090/accountmanagement", -6);
 
 
     private static final String PREF_NAME = "data";

@@ -33,6 +33,8 @@ public class CheckManager {
             return;
         }
 
+        query.setUrl(query.getUrl() + "/check");
+
         HttpGet httpGet = new HttpGet(context);
 
         httpGet.runRightAway(query, new IntegerHook(integerLive));

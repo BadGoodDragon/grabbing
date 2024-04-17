@@ -11,9 +11,12 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.google.android.material.textfield.TextInputLayout;
 
 import org.grabbing.devicepart.R;
+import org.grabbing.devicepart.data.storage.StaticStorage;
 import org.grabbing.devicepart.managers.UIManager;
 
 public class FaceRegisterActivity extends AppCompatActivity implements ActivitiesActions {
+    private TextInputLayout name;
+
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -30,18 +33,29 @@ public class FaceRegisterActivity extends AppCompatActivity implements Activitie
         });
 
         Button register = findViewById(R.id.face_register_button_register);
-        TextInputLayout name = findViewById(R.id.face_register_text_input_layout_name);
+        name = findViewById(R.id.face_register_text_input_layout_name);
 
-
+        register.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                StaticStorage.getExecutor().registerFace(name.getEditText().getText().toString());
+            }
+        });
     }
 
     @Override
     public void finishNow() {
+        UIManager.update();
         finish();
     }
 
     @Override
     public void setError(String error) {
-        Toast.makeText(this.getApplicationContext(), error, Toast.LENGTH_LONG).show();
+        runOnUiThread(new Thread() {
+            @Override
+            public void run() {
+                name.setError(error);
+            }
+        });
     }
 }
