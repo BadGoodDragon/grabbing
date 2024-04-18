@@ -104,7 +104,7 @@ public class FaceManager {
         Gson gson = new Gson();
 
         query.setQueryBody(gson.toJson(body));
-        query.setUrl(query.getUrl() + "/getlistoflinkedusers");
+        query.setAddedUrl("/getlistoflinkedusers");
 
         FaceManagerHook hook = new FaceManagerHook(linkedUsers);
 

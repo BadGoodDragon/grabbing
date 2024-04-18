@@ -28,8 +28,7 @@ public class QueryReceiptManager {
     public void run() {
         data.clearAll();
 
-        query.setUrl(query.getUrl() + "/receive");
-
+        query.setAddedUrl("/receive");
 
         QueryReceiptManagerHook hook = new QueryReceiptManagerHook(data);
         HttpQuery httpGet = new HttpGet(context);

@@ -234,15 +234,15 @@ public class Executor extends Thread {
             faceManager.getListOfLinkedUsers();
 
             synchronized (runningThread) {
-                try {
-                    runningThread.wait();
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
+                runningThread.wait();
             }
-
-            //TODO: use data
+            if (!usersLive.getListOfUsers().isEmpty()) {
+                UIManager.dataTransmission("list of linked users", usersLive.getListOfUsers());
+            } else {
+                UIManager.setError("error");
+            }
         } catch (Exception e) {
+            UIManager.setError("error");
             e.printStackTrace();
             return false;
         }

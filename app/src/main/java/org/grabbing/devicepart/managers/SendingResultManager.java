@@ -29,7 +29,8 @@ public class SendingResultManager {
         listOfQueryDataToJson.convert();
 
         query.setQueryBody(listOfQueryDataToJson.getJson());
-        query.setUrl(query.getUrl() + "/send");
+        query.setAddedUrl("/send");
+
 
 
         HttpQuery httpPost = new HttpPost(context);

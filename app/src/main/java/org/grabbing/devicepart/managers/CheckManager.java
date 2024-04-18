@@ -33,7 +33,8 @@ public class CheckManager {
             return;
         }
 
-        query.setUrl(query.getUrl() + "/check");
+        query.setAddedUrl("/check");
+
 
         HttpGet httpGet = new HttpGet(context);
 

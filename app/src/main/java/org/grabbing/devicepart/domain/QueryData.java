@@ -5,6 +5,7 @@ import java.util.Map;
 
 public class QueryData {
     private String url;
+    private String addedUrl;
     private int id;
 
     private Map<String, String> parameters;
@@ -22,6 +23,7 @@ public class QueryData {
 
     public QueryData(String url, int id) {
         this.url = url;
+        addedUrl = "";
         this.id = id;
 
         parameters = new HashMap<>();
@@ -39,6 +41,7 @@ public class QueryData {
 
 
     public void setUrl(String url) { this.url = url; }
+    public void setAddedUrl(String addedUrl) {this.addedUrl = addedUrl;}
     public void setId(int id) { this.id = id; }
     public void setParameters(Map<String, String> parameters) {this.parameters = parameters;}
     public void setQueryHeaders(Map<String, String> queryHeaders) {this.queryHeaders = queryHeaders;}
@@ -50,7 +53,9 @@ public class QueryData {
     public void setError(boolean error) {this.error = error;}
     public void setAuthorizationHeaders(Map<String, String> authorizationHeaders) {this.authorizationHeaders = authorizationHeaders;}
 
-    public String getUrl() {return url;}
+    public String getUrl() {
+        return url + addedUrl;
+    }
     public int getId() {return id;}
     public Map<String, String> getParameters() {return parameters;}
     public Map<String, String> getQueryHeaders() {

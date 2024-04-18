@@ -50,7 +50,7 @@ public class AccountManager {
 
         query.setQueryBody(gson.toJson(body));
         query.setAuthorizationHeaders(headers);
-        query.setUrl(query.getUrl() + "/generatetoken");
+        query.setAddedUrl("/generatetoken");
 
         HttpQuery httpPost = new HttpPost(context);
 
@@ -60,7 +60,7 @@ public class AccountManager {
     }
     public void register(String username, String password) {
         Map<String, String> body = new HashMap<>();
-        body.put("type", "register");
+        body.put("type", "/register");
 
         String usernameAndPassword = username + ":" + password;
 
@@ -71,7 +71,7 @@ public class AccountManager {
 
         query.setQueryBody(gson.toJson(body));
         query.setAuthorizationHeaders(headers);
-        query.setUrl(query.getUrl() + "/generatetoken");
+        query.setAddedUrl("register");
 
         HttpQuery httpPost = new HttpPost(context);
 
