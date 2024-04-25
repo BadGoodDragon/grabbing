@@ -45,7 +45,7 @@ public class FaceManager {
         Gson gson = new Gson();
 
         query.setQueryBody(gson.toJson(body));
-        query.setUrl(query.getUrl() + "/register");
+        query.setAddedUrl("/register");
 
         HttpQuery httpPost = new HttpPost(context);
 
@@ -60,7 +60,7 @@ public class FaceManager {
         Gson gson = new Gson();
 
         query.setQueryBody(gson.toJson(body));
-        query.setUrl(query.getUrl() + "/attach");
+        query.setAddedUrl("/attach");
 
         HttpQuery httpPost = new HttpPost(context);
 
@@ -74,7 +74,7 @@ public class FaceManager {
         Gson gson = new Gson();
 
         query.setQueryBody(gson.toJson(body));
-        query.setUrl(query.getUrl() + "/detach");
+        query.setAddedUrl("/detach");
 
         HttpQuery httpPost = new HttpPost(context);
 
@@ -88,7 +88,7 @@ public class FaceManager {
         Gson gson = new Gson();
 
         query.setQueryBody(gson.toJson(body));
-        query.setUrl(query.getUrl() + "/getcurrentname");
+        query.setAddedUrl("/getcurrentname");
 
         HttpQuery httpPost = new HttpPost(context);
 

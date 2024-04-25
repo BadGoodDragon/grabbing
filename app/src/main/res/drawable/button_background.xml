@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <shape xmlns:android="http://schemas.android.com/apk/res/android" android:shape="rectangle">
-    <solid android:color="#FFC700"/> <!-- Желтый цвет фона -->
-    <corners android:radius="20dp"/> <!-- Скругление углов -->
+    <solid android:color="#10DF0C"/> <!-- Желтый цвет фона -->
+    <corners android:radius="10dp"/> <!-- Скругление углов -->
 </shape>

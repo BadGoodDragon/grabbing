@@ -3,9 +3,12 @@ package org.grabbing.devicepart.activities;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.Observer;
 
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.GestureDetector;
+import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
@@ -104,6 +107,11 @@ public class MainActivity extends AppCompatActivity implements ActivitiesActions
             }
         });
 
+
+        View view = findViewById(R.id.main);
+        SwipeListener swipeListener = new SwipeListener(this);
+        view.setOnTouchListener(swipeListener);
+
     }
 
     private void initExecutor(Executor executor) {
@@ -181,7 +189,9 @@ public class MainActivity extends AppCompatActivity implements ActivitiesActions
     }
 
     @Override
-    public void finishNow() {}
+    public void finishNow() {
+        throw new RuntimeException("not call finishNow in MainActivity");
+    }
 
     @Override
     public void setError(String error) {
@@ -228,6 +238,53 @@ public class MainActivity extends AppCompatActivity implements ActivitiesActions
 
     public void setToken(String token) {
         LongTermStorage.saveToken(token, this.getApplicationContext());
+    }
+
+    public class SwipeListener implements View.OnTouchListener {
+
+        private final GestureDetector gestureDetector;
+
+        public SwipeListener(Context context) {
+            gestureDetector = new GestureDetector(context, new GestureListener());
+        }
+
+        @Override
+        public boolean onTouch(View v, MotionEvent event) {
+            return gestureDetector.onTouchEvent(event);
+        }
+
+        private final class GestureListener extends GestureDetector.SimpleOnGestureListener {
+
+            private static final int SWIPE_THRESHOLD = 100;
+            private static final int SWIPE_VELOCITY_THRESHOLD = 100;
+
+            @Override
+            public boolean onDown(MotionEvent e) {
+                return true;
+            }
+
+            @Override
+            public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
+                boolean result = false;
+                try {
+                    float diffY = e2.getY() - e1.getY();
+                    if (Math.abs(diffY) > SWIPE_THRESHOLD && Math.abs(velocityY) > SWIPE_VELOCITY_THRESHOLD) {
+                        if (diffY > 0) {
+                            // Свайп вниз
+                            onSwipeDown();
+                        }
+                    }
+                    result = true;
+                } catch (Exception exception) {
+                    exception.printStackTrace();
+                }
+                return result;
+            }
+        }
+
+        public void onSwipeDown() {
+            update();
+        }
     }
 
     public void update() {

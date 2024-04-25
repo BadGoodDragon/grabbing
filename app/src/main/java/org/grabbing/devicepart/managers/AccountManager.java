@@ -71,7 +71,7 @@ public class AccountManager {
 
         query.setQueryBody(gson.toJson(body));
         query.setAuthorizationHeaders(headers);
-        query.setAddedUrl("register");
+        query.setAddedUrl("/register");
 
         HttpQuery httpPost = new HttpPost(context);
 

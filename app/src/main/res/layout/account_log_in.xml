@@ -77,7 +77,7 @@
     </com.google.android.material.textfield.TextInputLayout>
 
 
-    <Button
+    <androidx.appcompat.widget.AppCompatButton
         android:id="@+id/account_log_in_button_log_in"
         android:layout_width="0dp"
 
@@ -97,7 +97,7 @@
         app:layout_constraintRight_toRightOf="@id/view"
         app:layout_constraintStart_toStartOf="@+id/view" />
 
-    <Button
+    <androidx.appcompat.widget.AppCompatButton
         android:id="@+id/account_log_in_button_back"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

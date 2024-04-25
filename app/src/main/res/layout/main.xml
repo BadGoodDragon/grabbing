@@ -4,7 +4,8 @@
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
     android:layout_weight="1"
-    android:scrollbars="none">
+    android:scrollbars="none"
+    android:id="@+id/main">
 
     <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:app="http://schemas.android.com/apk/res-auto"
@@ -71,7 +72,7 @@
             app:layout_constraintRight_toRightOf="@id/view"
             app:layout_constraintTop_toTopOf="@+id/view" />
 
-        <Button
+        <androidx.appcompat.widget.AppCompatButton
             android:id="@+id/main_button_log_in"
             android:layout_width="0dp"
             android:layout_height="40dp"
@@ -79,7 +80,7 @@
             android:layout_marginLeft="30dp"
 
             android:layout_marginRight="15dp"
-            android:layout_marginBottom="25dp"
+            android:layout_marginBottom="30dp"
 
             android:background="@drawable/button_background"
             android:gravity="center"
@@ -89,7 +90,7 @@
             app:layout_constraintLeft_toLeftOf="@id/view"
             app:layout_constraintRight_toLeftOf="@id/main_button_register" />
 
-        <Button
+        <androidx.appcompat.widget.AppCompatButton
             android:id="@+id/main_button_register"
             android:layout_width="0dp"
             android:layout_height="40dp"
@@ -97,7 +98,7 @@
             android:layout_marginLeft="15dp"
 
             android:layout_marginRight="30dp"
-            android:layout_marginBottom="25dp"
+            android:layout_marginBottom="30dp"
 
             android:background="@drawable/button_background"
             android:gravity="center"
@@ -167,14 +168,14 @@
             app:layout_constraintRight_toRightOf="@id/view2"
             app:layout_constraintTop_toTopOf="@+id/view2" />
 
-        <Button
+        <androidx.appcompat.widget.AppCompatButton
             android:id="@+id/main_button_management"
             android:layout_width="0dp"
             android:layout_height="40dp"
 
             android:layout_marginLeft="30dp"
             android:layout_marginRight="15dp"
-            android:layout_marginBottom="25dp"
+            android:layout_marginBottom="30dp"
 
             android:background="@drawable/button_background"
             android:gravity="center"
@@ -185,14 +186,14 @@
 
             app:layout_constraintRight_toLeftOf="@id/main_button_register_face" />
 
-        <Button
+        <androidx.appcompat.widget.AppCompatButton
             android:id="@+id/main_button_register_face"
             android:layout_width="0dp"
             android:layout_height="40dp"
 
             android:layout_marginLeft="15dp"
             android:layout_marginRight="30dp"
-            android:layout_marginBottom="25dp"
+            android:layout_marginBottom="30dp"
 
 
             android:background="@drawable/button_background"
@@ -264,14 +265,14 @@
             app:layout_constraintRight_toRightOf="@id/view3"
             app:layout_constraintTop_toTopOf="@+id/view3" />
 
-        <Button
+        <androidx.appcompat.widget.AppCompatButton
             android:id="@+id/main_button_start_stop"
             android:layout_width="0dp"
             android:layout_height="40dp"
 
             android:layout_marginLeft="30dp"
             android:layout_marginRight="30dp"
-            android:layout_marginBottom="25dp"
+            android:layout_marginBottom="30dp"
 
             android:background="@drawable/button_background"
             android:text="@string/strart"

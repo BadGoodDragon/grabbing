@@ -10,6 +10,8 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.android.material.textfield.TextInputLayout;
+
 import org.grabbing.devicepart.R;
 import org.grabbing.devicepart.activities.recyclerview.ListOfLinkedUsersAdapter;
 import org.grabbing.devicepart.data.storage.StaticStorage;
@@ -36,6 +38,35 @@ public class FaceManagementActivity extends AppCompatActivity implements Activit
                 finish();
             }
         });
+
+        Button attach = findViewById(R.id.face_management_button_attach);
+        Button detach = findViewById(R.id.face_management_button_detach);
+
+        TextInputLayout name = findViewById(R.id.face_management_text_input_layout_name);
+
+        Button update = findViewById(R.id.face_management_button_update);
+
+        attach.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                StaticStorage.getExecutor().attachFace(name.getEditText().getText().toString());
+            }
+        });
+
+        detach.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                StaticStorage.getExecutor().detachFace(name.getEditText().getText().toString());
+            }
+        });
+
+        update.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                StaticStorage.getExecutor().getListOfLinkedUsers();
+            }
+        });
+
 
         StaticStorage.getExecutor().getListOfLinkedUsers();
     }
