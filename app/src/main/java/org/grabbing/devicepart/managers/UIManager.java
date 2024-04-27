@@ -50,6 +50,12 @@ public class UIManager {
         }
     }
 
+    public static void dataTransmission(String title, boolean data) {
+        if (Objects.equals(title, "set button status")) {
+            mainActivity.setButtonStatus(data);
+        }
+    }
+
     public static void update() {
         mainActivity.update();
     }

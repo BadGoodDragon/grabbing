@@ -5,6 +5,7 @@ import androidx.lifecycle.Observer;
 
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.GestureDetector;
@@ -24,6 +25,7 @@ import org.grabbing.devicepart.livedata.ListOfUsersLive;
 import org.grabbing.devicepart.livedata.QueryDataListLive;
 import org.grabbing.devicepart.livedata.StringLive;
 import org.grabbing.devicepart.managers.UIManager;
+import org.grabbing.devicepart.wrappers.QuickCompletion;
 
 public class MainActivity extends AppCompatActivity implements ActivitiesActions {
 
@@ -40,6 +42,8 @@ public class MainActivity extends AppCompatActivity implements ActivitiesActions
     private int code = -1;
     private String faceName = "not authorized";
 
+    private static boolean isStart = false;
+    private static QuickCompletion quickCompletion;
 
     private boolean hasToken;
 
@@ -107,6 +111,21 @@ public class MainActivity extends AppCompatActivity implements ActivitiesActions
             }
         });
 
+        start.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (!isStart) {
+                    isStart = true;
+                    quickCompletion = new QuickCompletion();
+                    executor.executeQueries(quickCompletion);
+                } else {
+                    isStart = false;
+                    start.setBackgroundColor(Color.parseColor("#10DF0C"));
+                    quickCompletion.setStop(true);
+                    status.setText("Start");
+                }
+            }
+        });
 
         View view = findViewById(R.id.main);
         SwipeListener swipeListener = new SwipeListener(this);
@@ -214,6 +233,7 @@ public class MainActivity extends AppCompatActivity implements ActivitiesActions
                 public void run() {
                     username.setText("not authorized");
                     name.setText("not authorized");
+                    status.setText("Not ready to work");
                 }
             });
         } else if (n == 1) {
@@ -222,6 +242,7 @@ public class MainActivity extends AppCompatActivity implements ActivitiesActions
                 public void run() {
                     username.setText(LongTermStorage.getUsername(MainActivity.this.getApplicationContext()));
                     name.setText("not authorized");
+                    status.setText("Not ready to work");
                 }
             });
         } else if (n == 3) {
@@ -233,6 +254,7 @@ public class MainActivity extends AppCompatActivity implements ActivitiesActions
                 }
             });
             StaticStorage.getExecutor().getFaceName();
+            status.setText("Ready to work");
         }
     }
 
@@ -289,6 +311,17 @@ public class MainActivity extends AppCompatActivity implements ActivitiesActions
 
     public void update() {
         StaticStorage.getExecutor().check();
+    }
+
+    public void setButtonStatus(boolean v) {
+        if (v) {
+            start.setBackgroundColor(Color.GRAY);
+            start.setText("Stop");
+            isStart = true;
+        } else {
+            status.setText("Error");
+            isStart = false;
+        }
     }
 
 }

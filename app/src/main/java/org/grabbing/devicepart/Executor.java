@@ -182,11 +182,14 @@ public class Executor extends Thread {
         }
         if (integerLive.getData() != 3) {
             Log.e("STOP", "NON AUTH");
+            UIManager.dataTransmission("set button status", false);
             return false;
         }
 
 
         listLive.clearAll();
+
+        UIManager.dataTransmission("set button status", true);
 
         try {
 
@@ -222,6 +225,7 @@ public class Executor extends Thread {
 
         } catch (Exception e) {
             e.printStackTrace();
+            UIManager.dataTransmission("set button status", false);
             return false;
         }
         return true;
