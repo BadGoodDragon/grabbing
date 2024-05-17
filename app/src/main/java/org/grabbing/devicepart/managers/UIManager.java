@@ -1,63 +1,50 @@
 package org.grabbing.devicepart.managers;
 
-import android.util.Log;
 
-import androidx.appcompat.app.AppCompatActivity;
 
-import org.grabbing.devicepart.activities.ActivitiesActions;
-import org.grabbing.devicepart.activities.FaceManagementActivity;
-import org.grabbing.devicepart.activities.MainActivity;
+import org.grabbing.devicepart.data.storage.StaticStorage;
 
 import java.util.List;
 import java.util.Objects;
 
 public class UIManager {
-    private static ActivitiesActions currentActivity;
-
-    private static MainActivity mainActivity;
-    private static FaceManagementActivity faceManagementActivity;
-
-    public static void setCurrentActivity(ActivitiesActions currentActivity) {UIManager.currentActivity = currentActivity;}
-
-    public static void setMainActivity(MainActivity mainActivity) {UIManager.mainActivity = mainActivity;}
-    public static void setFaceManagementActivity(FaceManagementActivity faceManagementActivity) {UIManager.faceManagementActivity = faceManagementActivity;}
-
-    public static void setError(String error) {
-        currentActivity.setError(error);
+    public static void setSuccessAccountLogInActivity() {
+        StaticStorage.getAccountLogInFragment().successCallThread();
+    }
+    public static void setErrorAccountLogInActivity() {
+        StaticStorage.getAccountLogInFragment().errorCallThread();
     }
 
-    public static void nextStep() {
-        currentActivity.finishNow();
+    public static void setSuccessAccountRegisterActivity() {
+        StaticStorage.getAccountRegisterFragment().successCallThread();
+
+    }
+    public static void setErrorAccountRegisterActivity() {
+        StaticStorage.getAccountRegisterFragment().errorCallThread();
     }
 
-    public static void dataTransmission(String title, String data) {
-        if (Objects.equals(title, "face name")) {
-            mainActivity.setFaceName(data);
-        } else if (Objects.equals(title, "token")) {
-            mainActivity.setToken(data);
-        }
+    public static void setErrorMainActivity() {
+        StaticStorage.getMainActivity().setStartButtonOnClickErrorCallThread();
     }
 
-    public static void dataTransmission(String title, int data) {
-        if (Objects.equals(title, "authorization status")) {
-            mainActivity.setAuthStatus(data);
-        }
+    public static void setFaceNameMainActivity(String faceName) {
+        StaticStorage.getMainActivity().setFaceNameCallThread(faceName);
+    }
+    public static void setCheckTokenResultMainActivity(int status) {
+        StaticStorage.getMainActivity().setCheckTokenResultCallThread(status);
     }
 
-    public static void dataTransmission(String title, List<String> list) {
-        if (Objects.equals(title, "list of linked users")) {
-            faceManagementActivity.setListOfLinkedUsers(list);
-        }
+    public static void setListOfLinkedUsersFaceManagementActivity(List<String> list) {
+        StaticStorage.getFaceManagementFragment().setListOfLinkedUsersCallThread(list);
     }
 
-    public static void dataTransmission(String title, boolean data) {
-        if (Objects.equals(title, "set button status")) {
-            mainActivity.setButtonStatus(data);
-        }
+    public static void setErrorFaceManagementActivity() {
+        StaticStorage.getFaceManagementFragment().setErrorCallThread();
     }
-
-    public static void update() {
-        mainActivity.update();
+    public static void setSuccessFaceRegisterActivity() {
+        StaticStorage.getFaceRegisterFragment().successCallThread();
     }
-
+    public static void setErrorFaceRegisterActivity() {
+        StaticStorage.getFaceRegisterFragment().errorCallThread();
+    }
 }

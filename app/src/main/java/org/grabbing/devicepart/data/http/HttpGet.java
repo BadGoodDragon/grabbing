@@ -112,6 +112,7 @@ public class HttpGet implements HttpQuery {
             public void onResponse(String response) {
                 query.setResponseBody(response);
                 query.setHasResponse(true);
+                query.setError(false);
                 Log.i("HttpQuery.HttpGet.runRightAway * response", response);
                 hook.capture(query);
             }

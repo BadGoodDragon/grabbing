@@ -144,7 +144,7 @@ public class HttpPost implements HttpQuery {
 
             @Override
             public String getBodyContentType() {
-                return "text/plain";
+                return "application/json";
             }
 
             @Override

@@ -38,13 +38,7 @@ public class FaceManager {
     public void setStringLive(StringLive stringLive) {this.stringLive = stringLive;}
 
     public void register(String name) {
-        Map<String, String> body = new HashMap<>();
-        body.put("type", "register");
-        body.put("name", name);
-
-        Gson gson = new Gson();
-
-        query.setQueryBody(gson.toJson(body));
+        query.setQueryBody(name);
         query.setAddedUrl("/register");
 
         HttpQuery httpPost = new HttpPost(context);
@@ -53,13 +47,7 @@ public class FaceManager {
 
     }
     public void attach(String username) {
-        Map<String, String> body = new HashMap<>();
-        body.put("type", "attach");
-        body.put("username", username);
-
-        Gson gson = new Gson();
-
-        query.setQueryBody(gson.toJson(body));
+        query.setQueryBody(username);
         query.setAddedUrl("/attach");
 
         HttpQuery httpPost = new HttpPost(context);
@@ -67,13 +55,7 @@ public class FaceManager {
         httpPost.runRightAway(query, new BooleanHook(responses));
     }
     public void detach(String username) {
-        Map<String, String> body = new HashMap<>();
-        body.put("type", "detach");
-        body.put("username", username);
-
-        Gson gson = new Gson();
-
-        query.setQueryBody(gson.toJson(body));
+        query.setQueryBody(username);
         query.setAddedUrl("/detach");
 
         HttpQuery httpPost = new HttpPost(context);
@@ -82,12 +64,7 @@ public class FaceManager {
     }
 
     public void getCurrentName() {
-        Map<String, String> body = new HashMap<>();
-        body.put("type", "getCurrentName");
-
-        Gson gson = new Gson();
-
-        query.setQueryBody(gson.toJson(body));
+        query.setQueryBody("");
         query.setAddedUrl("/getcurrentname");
 
         HttpQuery httpPost = new HttpPost(context);
@@ -98,12 +75,7 @@ public class FaceManager {
     public void setLinkedUsers(ListOfUsersLive linkedUsers) {this.linkedUsers = linkedUsers;}
 
     public void getListOfLinkedUsers() {
-        Map<String, String> body = new HashMap<>();
-        body.put("type", "getListOfLinkedUsers");
-
-        Gson gson = new Gson();
-
-        query.setQueryBody(gson.toJson(body));
+        query.setQueryBody("");
         query.setAddedUrl("/getlistoflinkedusers");
 
         FaceManagerHook hook = new FaceManagerHook(linkedUsers);

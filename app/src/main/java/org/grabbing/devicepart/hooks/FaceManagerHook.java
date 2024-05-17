@@ -23,8 +23,13 @@ public class FaceManagerHook implements Hook{
     public void capture(QueryData query) {
         Gson gson = new Gson();
 
-        linkedUsers.replace(gson.fromJson(query.getResponseBody(), ArrayList.class));
-        linkedUsers.setStatus(true);
+        try {
+            linkedUsers.replace(gson.fromJson(query.getResponseBody(), ArrayList.class));
+            linkedUsers.setStatus(true);
+        } catch (Exception e) {
+            linkedUsers.replace(new ArrayList<>());
+            linkedUsers.setStatus(true);
+        }
     }
 
 }

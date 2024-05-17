@@ -38,18 +38,15 @@ public class AccountManager {
     }
 
     public void generateToken(String username, String password) {
+        QueryData query = new QueryData(this.query);
+
         Map<String, String> body = new HashMap<>();
-        body.put("type", "generateToken");
-
-        String usernameAndPassword = username + ":" + password;
-
-        Map<String, String> headers = new HashMap<>();
-        headers.put("Authorization", "Basic " + Base64.getEncoder().encodeToString(usernameAndPassword.getBytes()));
+        body.put("username", username);
+        body.put("password", password);
 
         Gson gson = new Gson();
 
         query.setQueryBody(gson.toJson(body));
-        query.setAuthorizationHeaders(headers);
         query.setAddedUrl("/generatetoken");
 
         HttpQuery httpPost = new HttpPost(context);
@@ -59,18 +56,13 @@ public class AccountManager {
         httpPost.runRightAway(query, hook);
     }
     public void register(String username, String password) {
-        Map<String, String> body = new HashMap<>();
-        body.put("type", "/register");
-
-        String usernameAndPassword = username + ":" + password;
+        QueryData query = new QueryData(this.query);
 
         Map<String, String> headers = new HashMap<>();
-        headers.put("Authorization", "Basic " + Base64.getEncoder().encodeToString(usernameAndPassword.getBytes()));
+        headers.put("X-Username", username);
+        headers.put("X-Password", password);
 
-        Gson gson = new Gson();
-
-        query.setQueryBody(gson.toJson(body));
-        query.setAuthorizationHeaders(headers);
+        query.setRegistrationHeaders(headers);
         query.setAddedUrl("/register");
 
         HttpQuery httpPost = new HttpPost(context);

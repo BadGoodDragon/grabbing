@@ -3,11 +3,10 @@ package org.grabbing.devicepart.converters;
 import com.google.gson.Gson;
 
 import org.grabbing.devicepart.domain.QueryData;
-import org.grabbing.devicepart.jsonforconversion.OutgoingQueries;
+import org.grabbing.devicepart.jsonforconversion.ResponseOutput;
 
-import java.util.HashMap;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 public class ListOfQueryDataToJson {
     private List<QueryData> data;
@@ -18,7 +17,9 @@ public class ListOfQueryDataToJson {
     public void convert() {
         json = new String();
 
-        Map<String, Integer> statusCode = new HashMap<>();
+        List<ResponseOutput> responseOutputs = new ArrayList<>();
+
+        /*Map<String, Integer> statusCode = new HashMap<>();
         Map<String, Map<String, String>> responseHeaders = new HashMap<>();
         Map<String, String> responseBody = new HashMap<>();
         Map<String, Boolean> error = new HashMap<>();
@@ -32,11 +33,24 @@ public class ListOfQueryDataToJson {
             error.put(String.valueOf(i), queryData.isError());
         }
 
-        OutgoingQueries outgoingQueries = new OutgoingQueries(data.size(), statusCode, responseHeaders, responseBody, error);
+        OutgoingQueries outgoingQueries = new OutgoingQueries(data.size(), statusCode, responseHeaders, responseBody, error);*/
+
+        for (QueryData queryData : data) {
+            responseOutputs
+                    .add(
+                            new ResponseOutput(
+                                    queryData.getId(),
+                                    queryData.getStatusCode(),
+                                    queryData.getResponseHeaders(),
+                                    queryData.getResponseBody(),
+                                    queryData.isError()
+                            )
+                    );
+        }
 
         Gson gson = new Gson();
 
-        json = gson.toJson(outgoingQueries);
+        json = gson.toJson(responseOutputs);
     }
 
     public String getJson() {return json;}

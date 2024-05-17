@@ -11,7 +11,9 @@ public class QueryData {
     private Map<String, String> parameters;
     private Map<String, String> queryHeaders;
     private String queryBody;
+
     private Map<String, String> authorizationHeaders;
+    private Map<String, String> registrationHeaders;
 
 
     private int statusCode;
@@ -29,7 +31,9 @@ public class QueryData {
         parameters = new HashMap<>();
         queryHeaders = new HashMap<>();
         queryBody = "";
+
         authorizationHeaders = new HashMap<>();
+        registrationHeaders = new HashMap<>();
 
         statusCode = -1;
         responseHeaders = new HashMap<>();
@@ -39,6 +43,21 @@ public class QueryData {
         error = false;
     }
 
+    public QueryData(QueryData queryData) {
+        this.url = queryData.url;
+        this.addedUrl = queryData.addedUrl;
+        this.id = queryData.id;
+        this.parameters = queryData.parameters;
+        this.queryHeaders = queryData.queryHeaders;
+        this.queryBody = queryData.queryBody;
+        this.authorizationHeaders = queryData.authorizationHeaders;
+        this.registrationHeaders = queryData.registrationHeaders;
+        this.statusCode = queryData.statusCode;
+        this.responseHeaders = queryData.responseHeaders;
+        this.responseBody = queryData.responseBody;
+        this.hasResponse = queryData.hasResponse;
+        this.error = queryData.error;
+    }
 
     public void setUrl(String url) { this.url = url; }
     public void setAddedUrl(String addedUrl) {this.addedUrl = addedUrl;}
@@ -52,6 +71,7 @@ public class QueryData {
     public void setHasResponse(boolean hasResponse) {this.hasResponse = hasResponse;}
     public void setError(boolean error) {this.error = error;}
     public void setAuthorizationHeaders(Map<String, String> authorizationHeaders) {this.authorizationHeaders = authorizationHeaders;}
+    public void setRegistrationHeaders(Map<String, String> registrationHeaders) {this.registrationHeaders = registrationHeaders;}
 
     public String getUrl() {
         return url + addedUrl;
@@ -60,14 +80,9 @@ public class QueryData {
     public Map<String, String> getParameters() {return parameters;}
     public Map<String, String> getQueryHeaders() {
         Map<String, String> result = new HashMap<>();
-        /*if (queryHeaders != null) {
-            result.putAll(queryHeaders);
-        }
-        if (authorizationHeaders != null) {
-            result.putAll(authorizationHeaders);
-        }*/
         result.putAll(queryHeaders);
         result.putAll(authorizationHeaders);
+        result.putAll(registrationHeaders);
         return result;
     }
     public String getQueryBody() {return queryBody;}

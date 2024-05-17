@@ -155,14 +155,13 @@ public class Executor extends Thread {
             accountManager.authorizeQuery(sendingResultManager.getQuery());
             accountManager.authorizeQuery(checkManager.getQuery());
 
-            UIManager.dataTransmission("token", tokenLive.getData());
-
             LongTermStorage.saveToken(tokenLive.getData(), context);
-            UIManager.nextStep();
+
+            UIManager.setSuccessAccountLogInActivity();
 
             return true;
         } else {
-            UIManager.setError("authorization error");
+            UIManager.setErrorAccountLogInActivity();
 
             return false;
         }
@@ -181,15 +180,15 @@ public class Executor extends Thread {
             }
         }
         if (integerLive.getData() != 3) {
-            Log.e("STOP", "NON AUTH");
-            UIManager.dataTransmission("set button status", false);
+            //UIManager.dataTransmission("set button status", false);
+            UIManager.setErrorMainActivity();
             return false;
         }
 
 
         listLive.clearAll();
 
-        UIManager.dataTransmission("set button status", true);
+        //UIManager.dataTransmission("set button status", true);
 
         try {
 
@@ -203,6 +202,11 @@ public class Executor extends Thread {
 
                 synchronized (runningThread) {
                     runningThread.wait();
+                }
+
+                if (listLive.get().isEmpty()) {
+                    Log.i("Executor.executeQueries * empty", "continue");
+                    continue;
                 }
 
                 Log.i("Executor.executeQueries * run", "run");
@@ -225,7 +229,8 @@ public class Executor extends Thread {
 
         } catch (Exception e) {
             e.printStackTrace();
-            UIManager.dataTransmission("set button status", false);
+            //UIManager.dataTransmission("set button status", false);
+            UIManager.setErrorMainActivity();
             return false;
         }
         return true;
@@ -241,12 +246,12 @@ public class Executor extends Thread {
                 runningThread.wait();
             }
             if (!usersLive.getListOfUsers().isEmpty()) {
-                UIManager.dataTransmission("list of linked users", usersLive.getListOfUsers());
+                UIManager.setListOfLinkedUsersFaceManagementActivity(usersLive.getListOfUsers());
             } else {
-                UIManager.setError("error");
+                UIManager.setErrorFaceManagementActivity();
             }
         } catch (Exception e) {
-            UIManager.setError("error");
+            UIManager.setErrorFaceManagementActivity();
             e.printStackTrace();
             return false;
         }
@@ -264,19 +269,19 @@ public class Executor extends Thread {
                     runningThread.wait();
                 } catch (InterruptedException e) {
                     e.printStackTrace();
-                    UIManager.setError("register error");
+                    UIManager.setErrorAccountRegisterActivity();
                 }
             }
 
             if (booleanLive.getData()) {
-                UIManager.nextStep();
+                UIManager.setSuccessAccountRegisterActivity();
             } else {
-                UIManager.setError("register error");
+                UIManager.setErrorAccountRegisterActivity();
             }
 
         } catch (Exception e) {
             e.printStackTrace();
-            UIManager.setError("register error");
+            UIManager.setErrorAccountRegisterActivity();
             return false;
         }
         return true;
@@ -293,13 +298,13 @@ public class Executor extends Thread {
             }
 
             if (booleanLive.getData()) {
-                UIManager.nextStep();
+                UIManager.setSuccessFaceRegisterActivity();
             } else {
-                UIManager.setError("register error");
+                UIManager.setErrorFaceRegisterActivity();
             }
         } catch (Exception e) {
             e.printStackTrace();
-            UIManager.setError("register error");
+            UIManager.setErrorFaceRegisterActivity();
             return false;
         }
         return true;
@@ -318,7 +323,9 @@ public class Executor extends Thread {
                     e.printStackTrace();
                 }
             }
-            //TODO: use data
+            if (!booleanLive.getData()) {
+                UIManager.setErrorFaceManagementActivity();
+            }
         } catch (Exception e) {
             e.printStackTrace();
             return false;
@@ -340,7 +347,9 @@ public class Executor extends Thread {
                 }
             }
 
-            //TODO: use data
+            if (!booleanLive.getData()) {
+                UIManager.setErrorFaceManagementActivity();
+            }
         } catch (Exception e) {
             e.printStackTrace();
             return false;
@@ -366,11 +375,12 @@ public class Executor extends Thread {
             Log.i("TAG", "!isEmpty");
 
             //UIManager.getMainActivity().setFaceName(stringLive.getData());
-            UIManager.dataTransmission("face name", stringLive.getData());
+            //UIManager.dataTransmission("face name", stringLive.getData());
+            UIManager.setFaceNameMainActivity(stringLive.getData());
 
             return true;
         } else {
-            UIManager.setError("error");
+            //UIManager.setError("error");
             return false;
         }
     }
@@ -387,7 +397,8 @@ public class Executor extends Thread {
         }
 
         //UIManager.getMainActivity().setAuthStatus(integerLive.getData());
-        UIManager.dataTransmission("authorization status", integerLive.getData());
+        //UIManager.dataTransmission("authorization status", integerLive.getData());
+        UIManager.setCheckTokenResultMainActivity(integerLive.getData());
 
         return true;
     }
