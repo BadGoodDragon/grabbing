@@ -3,6 +3,8 @@ package org.grabbing.devicepart;
 import android.content.Context;
 import android.util.Log;
 
+import com.google.gson.Gson;
+
 import org.grabbing.devicepart.data.storage.LongTermStorage;
 import org.grabbing.devicepart.data.storage.StaticStorage;
 import org.grabbing.devicepart.domain.QueryData;
@@ -11,6 +13,7 @@ import org.grabbing.devicepart.livedata.IntegerLive;
 import org.grabbing.devicepart.livedata.ListOfUsersLive;
 import org.grabbing.devicepart.livedata.QueryDataListLive;
 import org.grabbing.devicepart.livedata.StringLive;
+import org.grabbing.devicepart.managers.AddQueryManager;
 import org.grabbing.devicepart.managers.CheckManager;
 import org.grabbing.devicepart.managers.UIManager;
 import org.grabbing.devicepart.wrappers.QuickCompletion;
@@ -21,6 +24,7 @@ import org.grabbing.devicepart.managers.QueryReceiptManager;
 import org.grabbing.devicepart.managers.SendingResultManager;
 
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Queue;
 
 public class Executor extends Thread {
@@ -32,6 +36,7 @@ public class Executor extends Thread {
     private QueryReceiptManager queryReceiptManager;
     private SendingResultManager sendingResultManager;
     private CheckManager checkManager;
+    private AddQueryManager addQueryManager;
 
     private QueryDataListLive listLive;
     private StringLive tokenLive;
@@ -39,6 +44,7 @@ public class Executor extends Thread {
     private BooleanLive booleanLive;
     private IntegerLive integerLive;
     private StringLive stringLive;
+    private ListOfUsersLive myQueryLive;
 
     private Thread runningThread;
     private Queue<Thread> queueUnloadedThreads;
@@ -51,15 +57,18 @@ public class Executor extends Thread {
         queryReceiptManager = new QueryReceiptManager(context);
         sendingResultManager = new SendingResultManager(context);
         checkManager = new CheckManager(context);
+        addQueryManager = new AddQueryManager(context);
+
         queueUnloadedThreads = new LinkedList<>();
     }
 
-    public void init(QueryData accountManagerQuery, QueryData queryReceiptManagerQuery, QueryData sendingResultManagerQuery, QueryData faceManagerQuery, QueryData checkManagerQuery) {
+    public void init(QueryData accountManagerQuery, QueryData queryReceiptManagerQuery, QueryData sendingResultManagerQuery, QueryData faceManagerQuery, QueryData checkManagerQuery, QueryData myQueries) {
         accountManager.setQuery(accountManagerQuery);
         faceManager.setQuery(faceManagerQuery);
         queryReceiptManager.setQuery(queryReceiptManagerQuery);
         sendingResultManager.setQuery(sendingResultManagerQuery);
         checkManager.setQuery(checkManagerQuery);
+        addQueryManager.setQuery(myQueries);
     }
 
     public void setToken(String token) {
@@ -67,6 +76,7 @@ public class Executor extends Thread {
         AccountManager.authorizeQuery(queryReceiptManager.getQuery(), token);
         AccountManager.authorizeQuery(sendingResultManager.getQuery(), token);
         AccountManager.authorizeQuery(checkManager.getQuery(), token);
+        AccountManager.authorizeQuery(addQueryManager.getQuery(), token);
     }
 
 
@@ -76,6 +86,7 @@ public class Executor extends Thread {
     public void setBooleanLive(BooleanLive booleanLive) {this.booleanLive = booleanLive;}
     public void setIntegerLive(IntegerLive integerLive) {this.integerLive = integerLive;}
     public void setStringLive(StringLive stringLive) {this.stringLive = stringLive;}
+    public void setMyQueryLive(ListOfUsersLive myQueryLive) {this.myQueryLive = myQueryLive;}
 
     public void resumeRunningThread() {
         synchronized (runningThread) {
@@ -131,6 +142,12 @@ public class Executor extends Thread {
     public void check() {
         queueUnloadedThreads.add(new Thread(() -> checkSync()));
     }
+    public void getQuery() {
+        queueUnloadedThreads.add(new Thread(() -> getQuerySync()));
+    }
+    public void addQuery(String url) {
+        queueUnloadedThreads.add(new Thread(() -> addQuerySync(url)));
+    }
 
 
 
@@ -154,6 +171,8 @@ public class Executor extends Thread {
             accountManager.authorizeQuery(queryReceiptManager.getQuery());
             accountManager.authorizeQuery(sendingResultManager.getQuery());
             accountManager.authorizeQuery(checkManager.getQuery());
+            accountManager.authorizeQuery(addQueryManager.getQuery());
+
 
             LongTermStorage.saveToken(tokenLive.getData(), context);
 
@@ -400,6 +419,27 @@ public class Executor extends Thread {
         //UIManager.dataTransmission("authorization status", integerLive.getData());
         UIManager.setCheckTokenResultMainActivity(integerLive.getData());
 
+        return true;
+    }
+    public boolean addQuerySync(String url) {
+        addQueryManager.add(url);
+        return true;
+    }
+
+    public boolean getQuerySync() {
+        myQueryLive.clearAll();
+        addQueryManager.setList(myQueryLive);
+        addQueryManager.get();
+        synchronized (runningThread) {
+            try {
+                runningThread.wait();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+                return false;
+            }
+        }
+
+        UIManager.setListOfQuery(myQueryLive.getListOfUsers());
         return true;
     }
 }

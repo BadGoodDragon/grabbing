@@ -8,6 +8,7 @@ import org.grabbing.devicepart.activities.fragments.AccountLogInFragment;
 import org.grabbing.devicepart.activities.fragments.AccountRegisterFragment;
 import org.grabbing.devicepart.activities.fragments.FaceManagementFragment;
 import org.grabbing.devicepart.activities.fragments.FaceRegisterFragment;
+import org.grabbing.devicepart.activities.fragments.MyQueriesFragment;
 
 public class StaticStorage {
     private static Executor executor;
@@ -43,14 +44,22 @@ public class StaticStorage {
     private static AccountRegisterFragment accountRegisterFragment;
     private static FaceManagementFragment faceManagementFragment;
     private static FaceRegisterFragment faceRegisterFragment;
+    private static MyQueriesFragment myQueriesFragment;
 
     public static AccountLogInFragment getAccountLogInFragment() {return accountLogInFragment;}
     public static AccountRegisterFragment getAccountRegisterFragment() {return accountRegisterFragment;}
     public static FaceManagementFragment getFaceManagementFragment() {return faceManagementFragment;}
     public static FaceRegisterFragment getFaceRegisterFragment() {return faceRegisterFragment;}
+    public static MyQueriesFragment getMyQueriesFragment() {return myQueriesFragment;}
 
     public static void setAccountLogInFragment(AccountLogInFragment accountLogInFragment) {StaticStorage.accountLogInFragment = accountLogInFragment;}
     public static void setAccountRegisterFragment(AccountRegisterFragment accountRegisterFragment) {StaticStorage.accountRegisterFragment = accountRegisterFragment;}
     public static void setFaceManagementFragment(FaceManagementFragment faceManagementFragment) {StaticStorage.faceManagementFragment = faceManagementFragment;}
     public static void setFaceRegisterFragment(FaceRegisterFragment faceRegisterFragment) {StaticStorage.faceRegisterFragment = faceRegisterFragment;}
+    public static void setMyQueriesFragment(MyQueriesFragment myQueriesFragment) {StaticStorage.myQueriesFragment = myQueriesFragment;}
+
+    private static boolean hasFace = false;
+
+    public static boolean isHasFace() {return hasFace;}
+    public static void setHasFace(boolean hasFace) {StaticStorage.hasFace = hasFace;}
 }

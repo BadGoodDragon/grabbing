@@ -22,6 +22,7 @@ import org.grabbing.devicepart.activities.fragments.AccountLogInFragment;
 import org.grabbing.devicepart.activities.fragments.AccountRegisterFragment;
 import org.grabbing.devicepart.activities.fragments.FaceManagementFragment;
 import org.grabbing.devicepart.activities.fragments.FaceRegisterFragment;
+import org.grabbing.devicepart.activities.fragments.MyQueriesFragment;
 import org.grabbing.devicepart.data.storage.LongTermStorage;
 import org.grabbing.devicepart.data.storage.StaticStorage;
 import org.grabbing.devicepart.livedata.BooleanLive;
@@ -38,6 +39,7 @@ public class MainActivity extends AppCompatActivity {
     private Button registerFace;
     private Button management;
     private Button start;
+    private Button myQueries;
 
     private TextView username;
     private TextView name;
@@ -77,6 +79,7 @@ public class MainActivity extends AppCompatActivity {
         registerFace = findViewById(R.id.main_button_register_face);
         management = findViewById(R.id.main_button_management);
         start = findViewById(R.id.main_button_start_stop);
+        myQueries = findViewById(R.id.main_button_my_queries);
 
         username = findViewById(R.id.main_text_username);
         name = findViewById(R.id.main_text_name);
@@ -87,11 +90,13 @@ public class MainActivity extends AppCompatActivity {
         AccountRegisterFragment accountRegisterFragment = new AccountRegisterFragment();
         FaceManagementFragment faceManagementFragment = new FaceManagementFragment();
         FaceRegisterFragment faceRegisterFragment = new FaceRegisterFragment();
+        MyQueriesFragment myQueriesFragment = new MyQueriesFragment();
 
         StaticStorage.setAccountLogInFragment(accountLogInFragment);
         StaticStorage.setAccountRegisterFragment(accountRegisterFragment);
         StaticStorage.setFaceManagementFragment(faceManagementFragment);
         StaticStorage.setFaceRegisterFragment(faceRegisterFragment);
+        StaticStorage.setMyQueriesFragment(myQueriesFragment);
 
         logIn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -138,6 +143,15 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 startButtonOnClick();
+            }
+        });
+
+        myQueries.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+                transaction.add(R.id.main, myQueriesFragment);
+                transaction.commit();
             }
         });
     }
@@ -195,6 +209,7 @@ public class MainActivity extends AppCompatActivity {
         BooleanLive booleanLive = new BooleanLive();
         IntegerLive integerLive = new IntegerLive();
         StringLive stringLive = new StringLive();
+        ListOfUsersLive qLive = new ListOfUsersLive();
         listLive.getStatusLive().observeForever(new Observer<Boolean>() {
             @Override
             public void onChanged(Boolean v) {
@@ -243,6 +258,14 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         });
+        qLive.getStatusLive().observeForever(new Observer<Boolean>() {
+            @Override
+            public void onChanged(Boolean v) {
+                if (v) {
+                    executor.resumeRunningThread();
+                }
+            }
+        });
 
         executor.setUsersLive(usersLive);
         executor.setListLive(listLive);
@@ -250,13 +273,15 @@ public class MainActivity extends AppCompatActivity {
         executor.setBooleanLive(booleanLive);
         executor.setIntegerLive(integerLive);
         executor.setStringLive(stringLive);
+        executor.setMyQueryLive(qLive);
 
 
         executor.init(LongTermStorage.accountQuery,
                 LongTermStorage.queryReceiptManagerQuery,
                 LongTermStorage.sendingResultManagerQuery,
                 LongTermStorage.faceManagerQuery,
-                LongTermStorage.checkManagerQuery);
+                LongTermStorage.checkManagerQuery,
+                LongTermStorage.addQuery);
 
         executor.start();
 
@@ -268,13 +293,14 @@ public class MainActivity extends AppCompatActivity {
         if (LongTermStorage.hasSavedToken(this)) {
             Log.i("token", LongTermStorage.getToken(this.getApplicationContext()));
 
-            username.setText("Loading ...");
+            /*username.setText("Loading ...");
             name.setText("Loading ...");
-            status.setText("Wait ...");
+            status.setText("Wait ...");*/
 
             executor.setToken(LongTermStorage.getToken(this.getApplicationContext()));
             executor.check();
         } else {
+            StaticStorage.setHasFace(false);
             username.setText("Not authorized");
             name.setText("Not authorized");
             status.setText("Not ready to work");
@@ -287,6 +313,7 @@ public class MainActivity extends AppCompatActivity {
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
+                    StaticStorage.setHasFace(false);
                     username.setText("Not authorized");
                     name.setText("Not authorized");
                     MainActivity.this.status.setText("Not ready to work");
@@ -299,6 +326,7 @@ public class MainActivity extends AppCompatActivity {
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
+                    StaticStorage.setHasFace(false);
                     username.setText(LongTermStorage.getUsername(MainActivity.this));
                     name.setText("Not authorized");
                     MainActivity.this.status.setText("Not ready to work");
@@ -308,8 +336,9 @@ public class MainActivity extends AppCompatActivity {
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
+                    StaticStorage.setHasFace(true);
                     username.setText(LongTermStorage.getUsername(MainActivity.this));
-                    name.setText("Loading ...");
+                    //name.setText("Loading ...");
                     MainActivity.this.status.setText("Ready to work");
                 }
             });

@@ -2,6 +2,7 @@ package org.grabbing.devicepart.managers;
 
 
 
+import org.grabbing.devicepart.activities.fragments.MyQueriesFragment;
 import org.grabbing.devicepart.data.storage.StaticStorage;
 
 import java.util.List;
@@ -46,5 +47,9 @@ public class UIManager {
     }
     public static void setErrorFaceRegisterActivity() {
         StaticStorage.getFaceRegisterFragment().errorCallThread();
+    }
+
+    public static void setListOfQuery(List<String> list) {
+        StaticStorage.getMyQueriesFragment().setListOfQueriesCallThread(list);
     }
 }

@@ -5,7 +5,8 @@
     android:layout_height="match_parent"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/face_management"
-    android:background="@color/white">
+    android:background="@color/white"
+    android:orientation="vertical">
 
     <TextView
         android:id="@+id/textView"
