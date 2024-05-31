@@ -1,0 +1,150 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/face_management"
+    android:background="@color/white"
+    android:orientation="vertical">
+
+    <TextView
+        android:id="@+id/textView"
+        android:layout_width="wrap_content"
+
+        android:layout_height="wrap_content"
+        android:layout_marginStart="20dp"
+        android:layout_marginTop="31dp"
+        android:gravity="start"
+
+        android:text="@string/list_of_linked_users"
+        android:textSize="20dp"
+
+        android:textStyle="bold"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/face_management_recycler_view"
+        android:layout_width="match_parent"
+
+        android:layout_height="360dp"
+        android:layout_marginLeft="20dp"
+        android:layout_marginRight="20dp"
+
+        android:background="@drawable/rounded_background"
+        app:layout_constraintEnd_toEndOf="parent"
+
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/textView" />
+
+    <TextView
+        android:id="@+id/textView2"
+        android:layout_width="wrap_content"
+
+        android:layout_height="wrap_content"
+        android:gravity="start"
+
+        android:text="@string/actions"
+        android:textSize="20dp"
+
+        android:layout_marginLeft="20dp"
+        android:layout_marginTop="26dp"
+
+        android:textStyle="bold"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/face_management_recycler_view" />
+
+    <View
+        android:id="@+id/view2"
+        android:layout_width="match_parent"
+
+        android:layout_height="180dp"
+        android:layout_marginLeft="20dp"
+        android:layout_marginRight="20dp"
+
+        android:background="@drawable/rounded_background"
+
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/textView2" />
+
+    <androidx.appcompat.widget.AppCompatButton
+        android:id="@+id/face_management_button_attach"
+        android:layout_width="0dp"
+        android:layout_height="40dp"
+
+        android:layout_marginLeft="30dp"
+        android:layout_marginRight="15dp"
+        android:layout_marginBottom="25dp"
+
+        android:background="@drawable/button_background"
+        android:gravity="center"
+
+        android:text="@string/attach"
+        app:layout_constraintBottom_toBottomOf="@id/view2"
+        app:layout_constraintLeft_toLeftOf="@id/view2"
+
+        app:layout_constraintRight_toLeftOf="@id/face_management_button_detach" />
+
+    <androidx.appcompat.widget.AppCompatButton
+        android:id="@+id/face_management_button_detach"
+        android:layout_width="0dp"
+        android:layout_height="40dp"
+
+        android:layout_marginLeft="15dp"
+        android:layout_marginRight="30dp"
+        android:layout_marginBottom="25dp"
+
+
+        android:background="@drawable/button_background"
+        android:gravity="center"
+
+        android:text="@string/detach"
+        app:layout_constraintBottom_toBottomOf="@id/view2"
+        app:layout_constraintLeft_toRightOf="@id/face_management_button_attach"
+
+        app:layout_constraintRight_toRightOf="@id/view2" />
+
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/face_management_text_input_layout_name"
+        android:layout_width="match_parent"
+
+        android:layout_height="wrap_content"
+
+        android:hint="@string/face_management_name"
+        app:layout_constraintEnd_toEndOf="@+id/view2"
+
+        android:layout_marginRight="50dp"
+        android:layout_marginLeft="50dp"
+        android:layout_marginTop="25dp"
+
+        app:layout_constraintStart_toStartOf="@+id/view2"
+        app:layout_constraintTop_toTopOf="@+id/view2">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/editTextName"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="text" />
+
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <androidx.appcompat.widget.AppCompatButton
+        android:id="@+id/face_management_button_back"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+
+        android:background="@drawable/button_background"
+
+        android:text="@string/face_management_back"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+
+        android:layout_marginLeft="20dp"
+        android:layout_marginRight="20dp"
+        android:layout_marginBottom="40dp"
+        />
+
+
+</androidx.constraintlayout.widget.ConstraintLayout>
