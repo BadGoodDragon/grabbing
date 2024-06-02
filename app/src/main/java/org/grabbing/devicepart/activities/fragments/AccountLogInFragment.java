@@ -44,7 +44,6 @@ public class AccountLogInFragment extends Fragment {
             public void onClick(View v) {
                 StaticStorage.getExecutor().authorize(username.getEditText().getText().toString(),
                         password.getEditText().getText().toString());
-                LongTermStorage.saveUsername(username.getEditText().getText().toString(), getActivity().getApplicationContext());
             }
         });
 
@@ -53,6 +52,7 @@ public class AccountLogInFragment extends Fragment {
     }
 
     public void successCallThread() {
+        LongTermStorage.saveUsername(username.getEditText().getText().toString(), getActivity().getApplicationContext());
         getActivity().getSupportFragmentManager().beginTransaction().remove(AccountLogInFragment.this).commit();
     }
 
