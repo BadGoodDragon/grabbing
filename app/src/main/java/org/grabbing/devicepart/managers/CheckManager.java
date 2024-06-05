@@ -25,12 +25,6 @@ public class CheckManager {
     public void check(TypeLive<Integer> typeLive) { // 0 - нет никакой авторизации  1 - успешная авторизация  2 - успешная авторизация лица
         QueryData queryData = new QueryData(queryUrl, -1);
 
-        if (queryData.getAuthorizationHeaders().isEmpty()) {
-            typeLive.setData(0);
-            typeLive.setStatus(true);
-            return;
-        }
-
         queryData.setAddedUrl("/check");
 
         Map<String, String> headers = new HashMap<>();
@@ -39,6 +33,6 @@ public class CheckManager {
 
         HttpGet httpGet = new HttpGet(context);
 
-        httpGet.runRightAway(queryData, new TypeHook<Integer>(typeLive));
+        httpGet.runRightAway(queryData, new TypeHook<Integer>(typeLive, Integer.class));
     }
 }

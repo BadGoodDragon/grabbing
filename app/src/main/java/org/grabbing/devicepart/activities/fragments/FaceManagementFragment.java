@@ -16,9 +16,9 @@ import com.google.android.material.textfield.TextInputLayout;
 
 import org.grabbing.devicepart.R;
 
+import org.grabbing.devicepart.activities.Updater;
 import org.grabbing.devicepart.activities.recyclerview.ListOfLinkedUsersAdapter;
 import org.grabbing.devicepart.data.storage.LongTermStorage;
-import org.grabbing.devicepart.data.storage.StaticStorage;
 import org.grabbing.devicepart.livedata.TypeLive;
 import org.grabbing.devicepart.managers.FaceManager;
 
@@ -65,6 +65,7 @@ public class FaceManagementFragment extends Fragment {
         back.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                Updater.setFaceManagementFragment(null);
                 getActivity().getSupportFragmentManager().beginTransaction().remove(FaceManagementFragment.this).commit();
             }
         });
@@ -151,7 +152,7 @@ public class FaceManagementFragment extends Fragment {
     }
 
     public void getListOfUsers(TypeLive<List<String>> listLive) {
-        FaceManager faceManager = new FaceManager(getContext(), LongTermStorage.getToken(getContext()));
+        FaceManager faceManager = new FaceManager(getContext(), LongTermStorage.getToken(requireActivity().getApplicationContext()));
         faceManager.getListOfLinkedUsers(listLive);
         synchronized (thread) {
             try {

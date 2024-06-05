@@ -13,9 +13,6 @@ import androidx.lifecycle.Observer;
 import com.google.android.material.textfield.TextInputLayout;
 
 import org.grabbing.devicepart.R;
-import org.grabbing.devicepart.data.storage.LongTermStorage;
-import org.grabbing.devicepart.data.storage.StaticStorage;
-import org.grabbing.devicepart.hooks.TypeHook;
 import org.grabbing.devicepart.livedata.TypeLive;
 import org.grabbing.devicepart.managers.AccountManager;
 

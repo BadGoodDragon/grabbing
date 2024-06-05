@@ -18,7 +18,6 @@ import org.grabbing.devicepart.activities.fragments.AccountRegisterFragment;
 import org.grabbing.devicepart.activities.fragments.FaceManagementFragment;
 import org.grabbing.devicepart.activities.fragments.FaceRegisterFragment;
 import org.grabbing.devicepart.data.storage.LongTermStorage;
-import org.grabbing.devicepart.data.storage.StaticStorage;
 import org.grabbing.devicepart.domain.QueryData;
 import org.grabbing.devicepart.dto.QueryInput;
 import org.grabbing.devicepart.dto.ResponseOutput;
@@ -56,6 +55,10 @@ public class MainActivity extends AppCompatActivity {
 
     private TypeLive<Integer> integerLive;
     private TypeLive<String> stringLive;
+
+
+    FaceManagementFragment faceManagementFragment;
+
 
 
     @Override
@@ -115,11 +118,13 @@ public class MainActivity extends AppCompatActivity {
                 transaction.commit();
             }
         });
+
         management.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                FaceManagementFragment faceManagementFragment = new FaceManagementFragment();
+                faceManagementFragment = new FaceManagementFragment();
 
+                Updater.setFaceManagementFragment(faceManagementFragment);
                 FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
                 transaction.add(R.id.main, faceManagementFragment);
                 transaction.commit();
@@ -137,16 +142,45 @@ public class MainActivity extends AppCompatActivity {
             start.setText("Start");
         }
 
+
+        TypeLive<List<QueryInput>> listQueryInputLive = new TypeLive<>(new ArrayList<>());
+        listQueryInputLive.getStatusLive().observeForever(new Observer<Boolean>() {
+            @Override
+            public void onChanged(Boolean status) {
+                if (status) {
+                    synchronized (executeThread) {
+                        executeThread.notify();
+                    }
+                }
+            }
+        });
+
+        TypeLive<List<QueryData>> listQueryDataLive = new TypeLive<>(new ArrayList<>());
+        listQueryDataLive.getStatusLive().observeForever(new Observer<Boolean>() {
+            @Override
+            public void onChanged(Boolean status) {
+                if (status) {
+                    synchronized (executeThread) {
+                        executeThread.notify();
+                    }
+                }
+            }
+        });
+
         start.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 if (inProcess) {
                     inProcess = false;
+                    start.setBackgroundResource(R.drawable.button_background);
+                    start.setText("Start");
                 } else {
                     inProcess = true;
-
-                    thread = new Thread(() -> executeQueries());
+                    thread = new Thread(() -> executeQueries(listQueryInputLive,
+                                                            listQueryDataLive));
                     thread.start();
+                    start.setBackgroundResource(R.drawable.running_button_background);
+                    start.setText("Stop");
                 }
             }
         });
@@ -184,6 +218,12 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         });
+
+        Updater.setMainActivity(this);
+        if (!Updater.isOnRun()) {
+            Updater updater = new Updater();
+            updater.start();
+        }
     }
 
     @Override
@@ -193,9 +233,11 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void checkAuthorizationStatus(TypeLive<Integer> typeLive) {
+        Log.i("step", "2");
         CheckManager checkManager = new CheckManager(getApplicationContext(), LongTermStorage.getToken(getApplicationContext()));
         checkManager.check(typeLive);
 
+        Log.i("step", "3");
         synchronized (thread) {
             try {
                 thread.wait();
@@ -204,8 +246,10 @@ public class MainActivity extends AppCompatActivity {
             }
         }
 
+        Log.i("step", "4");
         authorizationStatus = typeLive.getData();
 
+        Log.i("step", "5");
         visualizeAuthorizationStatusCallThread(authorizationStatus);
     }
 
@@ -240,6 +284,11 @@ public class MainActivity extends AppCompatActivity {
 
             if (authorizationStatus != 3) {
                 Log.e("executeQueries * authorizationError", "authorizationStatus != 3");
+
+                inProcess = false;
+                start.setBackgroundResource(R.drawable.button_background);
+                start.setText("Error");
+
                 return;
             }
             listQueryInputLive.clearAll();
@@ -305,44 +354,45 @@ public class MainActivity extends AppCompatActivity {
 
     public void updateCallThread() {
         integerLive.clearAll();
+        Log.i("step", "1");
+        Log.i("token", LongTermStorage.getToken(getApplicationContext()));
         thread = new Thread(() -> checkAuthorizationStatus(integerLive));
         thread.start();
     }
 
     private void visualizeAuthorizationStatusCallThread(int authorizationStatus) {
+        Log.i("step", "6");
+        Log.i("authorizationStatus", String.valueOf(authorizationStatus));
         if (authorizationStatus == 1) {
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    StaticStorage.setHasFace(false);
                     username.setText(LongTermStorage.getUsername(MainActivity.this));
                     name.setText("Not authorized");
                     MainActivity.this.status.setText("Not ready to work");
                 }
             });
-        } else if (authorizationStatus == 2) {
+        } else if (authorizationStatus == 3) {
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    StaticStorage.setHasFace(true);
                     username.setText(LongTermStorage.getUsername(MainActivity.this));
                     MainActivity.this.status.setText("Ready to work");
-                    stringLive.clearAll();
-                    getFaceName(stringLive);
                 }
             });
-
+            stringLive.clearAll();
+            getFaceName(stringLive);
 
         } else {
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    StaticStorage.setHasFace(false);
                     username.setText("Not authorized");
                     name.setText("Not authorized");
                     MainActivity.this.status.setText("Not ready to work");
                 }
             });
+
         }
     }
 }

@@ -2,15 +2,24 @@ package org.grabbing.devicepart.activities;
 
 import android.util.Log;
 
-import org.grabbing.devicepart.data.storage.StaticStorage;
+import org.grabbing.devicepart.activities.fragments.FaceManagementFragment;
 
 public class Updater extends Thread {
-    private boolean onRun = true;
+    private static boolean onRun = false;
 
-    private final int DELAY = 1000;
+    public static boolean isOnRun() {return onRun;}
+
+    private static MainActivity mainActivity;
+    private static FaceManagementFragment faceManagementFragment;
+
+    public static void setMainActivity(MainActivity mainActivity) {Updater.mainActivity = mainActivity;}
+    public static void setFaceManagementFragment(FaceManagementFragment faceManagementFragment) {Updater.faceManagementFragment = faceManagementFragment;}
+
+    private static final int DELAY = 1000;
 
     @Override
     public void run() {
+        onRun = true;
         for (;;) {
             try {
                 Thread.sleep(DELAY);
@@ -18,16 +27,11 @@ public class Updater extends Thread {
                 e.printStackTrace();
             }
             Log.i("update", "update");
-            if (onRun) {
-                StaticStorage.getMainActivity().updateCallThread();
-                if (StaticStorage.getFaceManagementFragment() != null) {
-                    StaticStorage.getFaceManagementFragment().updateCallThread();
-                }
+
+            mainActivity.updateCallThread();
+            if (faceManagementFragment != null) {
+                faceManagementFragment.updateCallThread();
             }
         }
-    }
-
-    public void setOnRun(boolean onRun) {
-        this.onRun = onRun;
     }
 }

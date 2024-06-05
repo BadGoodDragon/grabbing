@@ -6,7 +6,6 @@ import org.grabbing.devicepart.data.http.HttpPost;
 import org.grabbing.devicepart.data.http.HttpQuery;
 import org.grabbing.devicepart.domain.QueryData;
 import org.grabbing.devicepart.hooks.EmptyHook;
-import org.grabbing.devicepart.livedata.ListOfUsersLive;
 
 public class AddQueryManager {
     /*private final Context context;

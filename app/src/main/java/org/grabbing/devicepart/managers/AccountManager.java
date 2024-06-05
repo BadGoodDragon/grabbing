@@ -1,7 +1,6 @@
 package org.grabbing.devicepart.managers;
 
 import android.content.Context;
-import android.util.Log;
 
 import com.google.gson.Gson;
 
@@ -11,7 +10,6 @@ import org.grabbing.devicepart.domain.QueryData;
 import org.grabbing.devicepart.hooks.TypeHook;
 import org.grabbing.devicepart.livedata.TypeLive;
 
-import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -40,7 +38,7 @@ public class AccountManager {
 
         HttpQuery httpPost = new HttpPost(context);
 
-        httpPost.runRightAway(query, new TypeHook<String>(typeLive));
+        httpPost.runRightAway(query, new TypeHook<String>(typeLive, String.class));
     }
     public void register(String username, String password, TypeLive<Boolean> typeLive) {
         QueryData query = new QueryData(queryUrl, -1);
@@ -54,7 +52,7 @@ public class AccountManager {
 
         HttpQuery httpPost = new HttpPost(context);
 
-        httpPost.runRightAway(query, new TypeHook<Boolean>(typeLive));
+        httpPost.runRightAway(query, new TypeHook<Boolean>(typeLive, Boolean.class));
     }
 
     public static QueryData authorizeQuery(QueryData unauthorizedQuery, String token) {

@@ -2,12 +2,17 @@ package org.grabbing.devicepart.managers;
 
 import android.content.Context;
 
+
+import com.google.gson.reflect.TypeToken;
+
 import org.grabbing.devicepart.data.http.HttpPost;
 import org.grabbing.devicepart.data.http.HttpQuery;
 import org.grabbing.devicepart.domain.QueryData;
 import org.grabbing.devicepart.hooks.TypeHook;
 import org.grabbing.devicepart.livedata.TypeLive;
 
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -37,7 +42,7 @@ public class FaceManager {
 
         HttpQuery httpPost = new HttpPost(context);
 
-        httpPost.runRightAway(query, new TypeHook<Boolean>(typeLive));
+        httpPost.runRightAway(query, new TypeHook<Boolean>(typeLive, Boolean.class));
     }
     public void attach(String username, TypeLive<Boolean> typeLive) {
         QueryData query = new QueryData(queryUrl, -1);
@@ -51,7 +56,7 @@ public class FaceManager {
 
         HttpQuery httpPost = new HttpPost(context);
 
-        httpPost.runRightAway(query, new TypeHook<Boolean>(typeLive));
+        httpPost.runRightAway(query, new TypeHook<Boolean>(typeLive, Boolean.class));
     }
     public void detach(String username, TypeLive<Boolean> typeLive) {
         QueryData query = new QueryData(queryUrl, -1);
@@ -65,7 +70,7 @@ public class FaceManager {
 
         HttpQuery httpPost = new HttpPost(context);
 
-        httpPost.runRightAway(query, new TypeHook<Boolean>(typeLive));
+        httpPost.runRightAway(query, new TypeHook<Boolean>(typeLive, Boolean.class));
     }
 
     public void getCurrentName(TypeLive<String> typeLive) {
@@ -79,7 +84,7 @@ public class FaceManager {
 
         HttpQuery httpPost = new HttpPost(context);
 
-        httpPost.runRightAway(query, new TypeHook<String>(typeLive));
+        httpPost.runRightAway(query, new TypeHook<String>(typeLive, String.class));
     }
 
     public void getListOfLinkedUsers(TypeLive<List<String>> typeLive) {
@@ -95,4 +100,5 @@ public class FaceManager {
 
         httpPost.runRightAway(query, new TypeHook<List<String>>(typeLive));
     }
+
 }
