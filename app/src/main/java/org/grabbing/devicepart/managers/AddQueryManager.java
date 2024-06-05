@@ -6,11 +6,10 @@ import org.grabbing.devicepart.data.http.HttpPost;
 import org.grabbing.devicepart.data.http.HttpQuery;
 import org.grabbing.devicepart.domain.QueryData;
 import org.grabbing.devicepart.hooks.EmptyHook;
-import org.grabbing.devicepart.hooks.FaceManagerHook;
 import org.grabbing.devicepart.livedata.ListOfUsersLive;
 
 public class AddQueryManager {
-    private final Context context;
+    /*private final Context context;
     private QueryData query;
     private ListOfUsersLive list;
 
@@ -41,6 +40,6 @@ public class AddQueryManager {
         query.setAddedUrl("/get");
 
         HttpQuery httpQuery = new HttpPost(context);
-        httpQuery.runRightAway(query, new FaceManagerHook(list));
-    }
+        //httpQuery.runRightAway(query, new FaceManagerHook(list));
+    }*/
 }

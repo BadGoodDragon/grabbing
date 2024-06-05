@@ -8,6 +8,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.Observer;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -18,12 +19,18 @@ import org.grabbing.devicepart.R;
 import org.grabbing.devicepart.activities.recyclerview.ListOfLinkedUsersAdapter;
 import org.grabbing.devicepart.data.storage.LongTermStorage;
 import org.grabbing.devicepart.data.storage.StaticStorage;
+import org.grabbing.devicepart.livedata.TypeLive;
+import org.grabbing.devicepart.managers.FaceManager;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class FaceManagementFragment extends Fragment {
     private RecyclerView recyclerView;
     private TextInputLayout name;
+    Thread thread;
+    private TypeLive<List<String>> listLive;
+
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -32,7 +39,22 @@ public class FaceManagementFragment extends Fragment {
 
         initUI(view);
 
-        StaticStorage.getExecutor().getListOfLinkedUsers();
+        listLive = new TypeLive<>(new ArrayList<>());
+
+        listLive.getStatusLive().observeForever(new Observer<Boolean>() {
+            @Override
+            public void onChanged(Boolean status) {
+                if (status) {
+                    synchronized (thread) {
+                        thread.notify();
+                    }
+                }
+            }
+        });
+
+        listLive.clearAll();
+        thread = new Thread(() -> getListOfUsers(listLive));
+        thread.start();
 
         return view;
     }
@@ -52,29 +74,98 @@ public class FaceManagementFragment extends Fragment {
 
         name = view.findViewById(R.id.face_management_text_input_layout_name);
 
+
+        thread = new Thread("Face Thread");
+        TypeLive<Boolean> typeLive = new TypeLive<>(false);
+
+        typeLive.getStatusLive().observeForever(new Observer<Boolean>() {
+            @Override
+            public void onChanged(Boolean status) {
+                if (status) {
+                    synchronized (thread) {
+                        thread.notify();
+                    }
+                }
+            }
+        });
+
         attach.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                StaticStorage.getExecutor().attachFace(name.getEditText().getText().toString());
-                name.setErrorEnabled(false);
+                typeLive.clearAll();
+                thread = new Thread(() -> attach(name.getEditText().getText().toString(), typeLive));
+                thread.start();
             }
         });
 
         detach.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                StaticStorage.getExecutor().detachFace(name.getEditText().getText().toString());
-                if (name.getEditText().getText().toString().equals(LongTermStorage.getUsername(FaceManagementFragment.this.requireActivity()))) {
-                    getActivity().getSupportFragmentManager().beginTransaction().remove(FaceManagementFragment.this).commit();
-                    name.setErrorEnabled(false);
-                }
+                typeLive.clearAll();
+                thread = new Thread(() -> detach(name.getEditText().getText().toString(), typeLive));
+                thread.start();
             }
         });
+
+    }
+
+    public void attach(String name, TypeLive<Boolean> typeLive) {
+        FaceManager faceManager = new FaceManager(getContext(), LongTermStorage.getToken(getContext()));
+        faceManager.attach(name, typeLive);
+        synchronized (thread) {
+            try {
+                thread.wait();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+
+        Boolean currentData = typeLive.getData();
+
+        if (!currentData) {
+            setErrorCallThread();
+        }
+    }
+    public void detach(String name, TypeLive<Boolean> typeLive) {
+        FaceManager faceManager = new FaceManager(getContext(), LongTermStorage.getToken(getContext()));
+        faceManager.detach(name, typeLive);
+        synchronized (thread) {
+            try {
+                thread.wait();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+
+        Boolean currentData = typeLive.getData();
+
+        if (!currentData) {
+            setErrorCallThread();
+        }
     }
 
     public void updateCallThread() {
-        StaticStorage.getExecutor().getListOfLinkedUsers();
+        listLive.clearAll();
+        thread = new Thread(() -> getListOfUsers(listLive));
+        thread.start();
     }
+
+    public void getListOfUsers(TypeLive<List<String>> listLive) {
+        FaceManager faceManager = new FaceManager(getContext(), LongTermStorage.getToken(getContext()));
+        faceManager.getListOfLinkedUsers(listLive);
+        synchronized (thread) {
+            try {
+                thread.wait();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+
+        List<String> list = listLive.getData();
+        setListOfLinkedUsersCallThread(list);
+    }
+
+
 
     public void setListOfLinkedUsersCallThread(List<String> list) {
         if (!isAdded()) {

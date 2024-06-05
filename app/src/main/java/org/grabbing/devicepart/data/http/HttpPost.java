@@ -106,7 +106,7 @@ public class HttpPost implements HttpQuery {
 
     @Override
     public void runRightAway(QueryData query, Hook hook) {
-        Log.i("HttpQuery.HttpPost.runRightAway * start", query.toString());
+        Log.i("HttpQuery.HttpPost.runRightAway * start", query.getUrl());
 
         Response.Listener<String> listener = new Response.Listener<String>() {
             @Override

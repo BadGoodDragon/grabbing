@@ -4,40 +4,41 @@ import android.content.Context;
 
 import org.grabbing.devicepart.data.http.HttpGet;
 import org.grabbing.devicepart.domain.QueryData;
-import org.grabbing.devicepart.hooks.BooleanHook;
-import org.grabbing.devicepart.hooks.IntegerHook;
-import org.grabbing.devicepart.livedata.IntegerLive;
+import org.grabbing.devicepart.hooks.TypeHook;
+import org.grabbing.devicepart.livedata.TypeLive;
+
+import java.util.HashMap;
+import java.util.Map;
 
 public class CheckManager {
     private final Context context;
+    private final String token;
 
-    private QueryData query;
-    IntegerLive integerLive;
+    private static final String queryUrl = "http://192.168.0.75:8090/checkmanagement";
 
 
-    public CheckManager(Context context) {
+    public CheckManager(Context context, String token) {
         this.context = context;
+        this.token = token;
     }
 
-    public void setQuery(QueryData query) {this.query = query;}
-    public QueryData getQuery() {return query;}
+    public void check(TypeLive<Integer> typeLive) { // 0 - нет никакой авторизации  1 - успешная авторизация  2 - успешная авторизация лица
+        QueryData queryData = new QueryData(queryUrl, -1);
 
-    public void setIntegerLive(IntegerLive integerLive) {this.integerLive = integerLive;}
-
-    public void check() { // 0 - нет никакой авторизации  1 - успешная авторизация  2 - успешная авторизация лица
-        integerLive.clearAll();
-
-        if (query.getAuthorizationHeaders().isEmpty()) {
-            integerLive.setData(0);
-            integerLive.setStatus(true);
+        if (queryData.getAuthorizationHeaders().isEmpty()) {
+            typeLive.setData(0);
+            typeLive.setStatus(true);
             return;
         }
 
-        query.setAddedUrl("/check");
+        queryData.setAddedUrl("/check");
 
+        Map<String, String> headers = new HashMap<>();
+        headers.put("Authorization", "Bearer " + token);
+        queryData.setAuthorizationHeaders(headers);
 
         HttpGet httpGet = new HttpGet(context);
 
-        httpGet.runRightAway(query, new IntegerHook(integerLive));
+        httpGet.runRightAway(queryData, new TypeHook<Integer>(typeLive));
     }
 }

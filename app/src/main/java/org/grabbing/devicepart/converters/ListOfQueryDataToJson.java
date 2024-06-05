@@ -3,7 +3,7 @@ package org.grabbing.devicepart.converters;
 import com.google.gson.Gson;
 
 import org.grabbing.devicepart.domain.QueryData;
-import org.grabbing.devicepart.jsonforconversion.ResponseOutput;
+import org.grabbing.devicepart.dto.ResponseOutput;
 
 import java.util.ArrayList;
 import java.util.List;

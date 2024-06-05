@@ -6,7 +6,7 @@ import android.content.Context;
 import org.grabbing.devicepart.data.http.HttpGet;
 import org.grabbing.devicepart.domain.QueryData;
 import org.grabbing.devicepart.hooks.QueryExecutionManagerHook;
-import org.grabbing.devicepart.livedata.QueryDataListLive;
+import org.grabbing.devicepart.livedata.TypeLive;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -14,7 +14,7 @@ import java.util.List;
 public class QueryExecutionManager {
     private final Context context;
     private List<QueryData> data;
-    private QueryDataListLive outputData;
+    private TypeLive<List<QueryData>> outputData;
 
     private QueryExecutionManagerHook hook;
 
@@ -23,7 +23,7 @@ public class QueryExecutionManager {
     }
 
     public void setData(List<QueryData> data) {this.data = data;}
-    public void setOutputData(QueryDataListLive outputData) {this.outputData = outputData;}
+    public void setOutputData(TypeLive<List<QueryData>> outputData) {this.outputData = outputData;}
 
     public void run() {
         outputData.setStatus(false);

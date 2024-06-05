@@ -21,7 +21,7 @@ import java.util.List;
 
 public class MyQueriesFragment extends Fragment {
 
-    private RecyclerView recyclerView;
+    /*private RecyclerView recyclerView;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -76,5 +76,5 @@ public class MyQueriesFragment extends Fragment {
                 recyclerView.setAdapter(customAdapter);
             }
         });
-    }
+    }*/
 }
