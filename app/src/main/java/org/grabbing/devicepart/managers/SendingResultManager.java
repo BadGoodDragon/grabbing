@@ -10,7 +10,9 @@ import org.grabbing.devicepart.domain.QueryData;
 import org.grabbing.devicepart.hooks.EmptyHook;
 import org.grabbing.devicepart.dto.ResponseOutput;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class SendingResultManager {
     private final Context context;
@@ -28,6 +30,10 @@ public class SendingResultManager {
         QueryData query = new QueryData(queryUrl, -1);
 
         Gson gson = new Gson();
+
+        Map<String, String> headers = new HashMap<>();
+        headers.put("Authorization", "Bearer " + token);
+        query.setAuthorizationHeaders(headers);
 
         query.setQueryBody(gson.toJson(data));
         query.setAddedUrl("/send");

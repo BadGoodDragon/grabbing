@@ -175,10 +175,11 @@ public class MainActivity extends AppCompatActivity {
                     start.setBackgroundResource(R.drawable.button_background);
                     start.setText("Start");
                 } else {
+                    Log.i("step", "1");
                     inProcess = true;
-                    thread = new Thread(() -> executeQueries(listQueryInputLive,
+                    executeThread = new Thread(() -> executeQueries(listQueryInputLive,
                                                             listQueryDataLive));
-                    thread.start();
+                    executeThread.start();
                     start.setBackgroundResource(R.drawable.running_button_background);
                     start.setText("Stop");
                 }
@@ -233,11 +234,9 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void checkAuthorizationStatus(TypeLive<Integer> typeLive) {
-        Log.i("step", "2");
         CheckManager checkManager = new CheckManager(getApplicationContext(), LongTermStorage.getToken(getApplicationContext()));
         checkManager.check(typeLive);
 
-        Log.i("step", "3");
         synchronized (thread) {
             try {
                 thread.wait();
@@ -246,10 +245,8 @@ public class MainActivity extends AppCompatActivity {
             }
         }
 
-        Log.i("step", "4");
         authorizationStatus = typeLive.getData();
 
-        Log.i("step", "5");
         visualizeAuthorizationStatusCallThread(authorizationStatus);
     }
 
@@ -272,18 +269,21 @@ public class MainActivity extends AppCompatActivity {
 
     private void executeQueries(TypeLive<List<QueryInput>> listQueryInputLive,
                                 TypeLive<List<QueryData>> listQueryDataLive) {
+        Log.i("step", "2");
         QueryReceiptManager queryReceiptManager =
                 new QueryReceiptManager(getApplicationContext(), LongTermStorage.getToken(getApplicationContext()));
         QueryExecutionManager queryExecutionManager =
                 new QueryExecutionManager(getApplicationContext());
         SendingResultManager sendingResultManager =
                 new SendingResultManager(getApplicationContext(), LongTermStorage.getToken(getApplicationContext()));
+        Log.i("step", "3");
 
-        for (;;) {
-            Log.i("executeQueries * check", "check");
+        for (;inProcess;) {
+            Log.i("executeQueries", "check");
+            Log.i("authorizationStatus", String.valueOf(authorizationStatus));
 
             if (authorizationStatus != 3) {
-                Log.e("executeQueries * authorizationError", "authorizationStatus != 3");
+                Log.e("executeQueries", "authorizationStatus != 3");
 
                 inProcess = false;
                 start.setBackgroundResource(R.drawable.button_background);
@@ -291,12 +291,13 @@ public class MainActivity extends AppCompatActivity {
 
                 return;
             }
+            Log.i("step", "4");
             listQueryInputLive.clearAll();
             listQueryDataLive.clearAll();
 
-            Log.i("executeQueries * get", "get");
+            Log.i("executeQueries", "get");
             queryReceiptManager.run(listQueryInputLive);
-
+            Log.i("step", "5");
             synchronized (executeThread) {
                 try {
                     executeThread.wait();
@@ -304,11 +305,12 @@ public class MainActivity extends AppCompatActivity {
                     e.printStackTrace();
                 }
             }
-
+            Log.i("step", "6");
             if (listQueryInputLive.getData().isEmpty()) {
-                Log.i("executeQueries * empty", "continue");
+                Log.i("executeQueries", "continue");
                 continue;
             }
+            Log.i("step", "7");
 
             List<QueryData> inputData = new ArrayList<>();
             for (QueryInput queryInput : listQueryInputLive.getData()) {
@@ -318,8 +320,9 @@ public class MainActivity extends AppCompatActivity {
                 queryData.setQueryBody(queryInput.getQueryBody());
                 inputData.add(queryData);
             }
+            Log.i("step", "8");
 
-            Log.i("executeQueries * run", "run");
+            Log.i("executeQueries", "run");
 
             queryExecutionManager.setData(inputData);
             queryExecutionManager.setOutputData(listQueryDataLive);
@@ -347,21 +350,21 @@ public class MainActivity extends AppCompatActivity {
                         );
             }
 
-            Log.i("executeQueries * set", "set");
+            Log.i("executeQueries", "set");
             sendingResultManager.run(outputData);
         }
+        Log.i("step", "4");
+
     }
 
     public void updateCallThread() {
         integerLive.clearAll();
-        Log.i("step", "1");
         Log.i("token", LongTermStorage.getToken(getApplicationContext()));
         thread = new Thread(() -> checkAuthorizationStatus(integerLive));
         thread.start();
     }
 
     private void visualizeAuthorizationStatusCallThread(int authorizationStatus) {
-        Log.i("step", "6");
         Log.i("authorizationStatus", String.valueOf(authorizationStatus));
         if (authorizationStatus == 1) {
             runOnUiThread(new Runnable() {

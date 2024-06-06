@@ -1,5 +1,7 @@
 package org.grabbing.devicepart.hooks;
 
+import android.util.Log;
+
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
@@ -28,7 +30,9 @@ public class TypeHook<Type> implements Hook {
         if (typeClass != null) {
             type = gson.fromJson(query.getResponseBody(), typeClass);
         } else {
-            type = gson.fromJson(query.getResponseBody(), new TypeToken<Type>(){});
+            Log.i("TypeClass", "null");
+            type = gson.fromJson(query.getResponseBody(), new TypeToken<Type>(){}.getType());
+            Log.i("TypeClass", type.toString());
         }
 
         if (type == null) {

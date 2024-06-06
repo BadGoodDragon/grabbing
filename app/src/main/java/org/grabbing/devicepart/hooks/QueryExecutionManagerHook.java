@@ -10,9 +10,9 @@ public class QueryExecutionManagerHook implements Hook {
     private int currentQuantity;
     private final int expectedQuantity;
 
-    public QueryExecutionManagerHook(TypeLive<List<QueryData>> data) {
+    public QueryExecutionManagerHook(TypeLive<List<QueryData>> data, int expectedQuantity) {
         this.data = data;
-        this.expectedQuantity = data.getData().size();
+        this.expectedQuantity = expectedQuantity;
     }
 
     @Override

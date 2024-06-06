@@ -7,6 +7,8 @@ import org.grabbing.devicepart.data.http.HttpQuery;
 import org.grabbing.devicepart.domain.QueryData;
 
 import org.grabbing.devicepart.dto.QueryInput;
+import org.grabbing.devicepart.hooks.ListHook;
+import org.grabbing.devicepart.hooks.TypeHook;
 import org.grabbing.devicepart.livedata.TypeLive;
 
 import java.util.HashMap;
@@ -33,9 +35,8 @@ public class QueryReceiptManager {
         headers.put("Authorization", "Bearer " + token);
         query.setAuthorizationHeaders(headers);
 
-        //QueryReceiptManagerHook hook = new QueryReceiptManagerHook(data);
         HttpQuery httpGet = new HttpGet(context);
-        //httpGet.runRightAway(query, hook);
+        httpGet.runRightAway(query, new ListHook(typeLive));
     }
 
 }

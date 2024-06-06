@@ -27,7 +27,7 @@ public class QueryExecutionManager {
 
     public void run() {
         outputData.setStatus(false);
-        hook = new QueryExecutionManagerHook(outputData);
+        hook = new QueryExecutionManagerHook(outputData, data.size());
 
         HttpGet httpGet = new HttpGet(context);
         httpGet.setData(data);
