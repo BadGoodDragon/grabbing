@@ -30,9 +30,7 @@ public class TypeHook<Type> implements Hook {
         if (typeClass != null) {
             type = gson.fromJson(query.getResponseBody(), typeClass);
         } else {
-            Log.i("TypeClass", "null");
             type = gson.fromJson(query.getResponseBody(), new TypeToken<Type>(){}.getType());
-            Log.i("TypeClass", type.toString());
         }
 
         if (type == null) {

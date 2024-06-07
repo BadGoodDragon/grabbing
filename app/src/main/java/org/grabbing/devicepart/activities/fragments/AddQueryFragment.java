@@ -5,14 +5,18 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 
+import com.google.android.material.textfield.TextInputLayout;
+
 import org.grabbing.devicepart.R;
 import org.grabbing.devicepart.activities.Updater;
 import org.grabbing.devicepart.activities.recyclerview.ItemAdapter;
+import org.grabbing.devicepart.dto.NewQuery;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -30,6 +34,7 @@ public class AddQueryFragment extends Fragment {
         Button back = view.findViewById(R.id.add_query_button_back);
         Button add = view.findViewById(R.id.add_query_button_add);
 
+        TextInputLayout url = view.findViewById(R.id.add_query_text_input_layout_url);
         RecyclerView parameters = view.findViewById(R.id.recycler_view_parameters);
         Button addParameter = view.findViewById(R.id.button_add_parameter);
         RecyclerView headers = view.findViewById(R.id.recycler_view_headers);
@@ -79,6 +84,19 @@ public class AddQueryFragment extends Fragment {
                 transferMap.put("", "");
                 headersAdapter = new ItemAdapter(transferMap);
                 headers.setAdapter(headersAdapter);
+            }
+        });
+
+
+        add.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                NewQuery newQuery = new NewQuery(url.getEditText().getText().toString(),
+                        parametersAdapter.getMap(),
+                        headersAdapter.getMap(),
+                        "",
+                        0); //TODO: write get body and host id;
+                Log.i("new query", newQuery.toString());
             }
         });
 

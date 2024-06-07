@@ -10,12 +10,12 @@
         android:id="@+id/textView1"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/parameters"
+        android:text="Query Parameters"
         android:textSize="20dp"
         android:textStyle="bold" />
 
     <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/recycler_view_parameters"
+        android:id="@+id/recycler_view_query_parameters"
         android:layout_width="match_parent"
         android:layout_height="350dp"
         android:background="@drawable/rounded_background"
@@ -23,32 +23,17 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/textView1"/>
 
-    <androidx.appcompat.widget.AppCompatButton
-        android:id="@+id/button_add_parameter"
-        android:layout_width="match_parent"
-        android:layout_height="40dp"
-
-        android:layout_marginTop="10dp"
-
-        android:background="@drawable/button_background"
-        android:gravity="center"
-        android:text="Add a Parameter"
-
-        app:layout_constraintBottom_toBottomOf="@id/view"
-        app:layout_constraintLeft_toLeftOf="@id/view"
-        app:layout_constraintRight_toLeftOf="@id/main_button_register" />
-
     <TextView
         android:id="@+id/textView2"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/headers"
+        android:text="Query Headers"
         android:textSize="20dp"
         android:textStyle="bold"
         android:layout_marginTop="31dp"/>
 
     <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/recycler_view_headers"
+        android:id="@+id/recycler_view_query_headers"
         android:layout_width="match_parent"
         android:layout_height="350dp"
         android:background="@drawable/rounded_background"
@@ -56,20 +41,6 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/textView2" />
 
-    <androidx.appcompat.widget.AppCompatButton
-        android:id="@+id/button_add_header"
-        android:layout_width="match_parent"
-        android:layout_height="40dp"
-
-        android:layout_marginTop="10dp"
-
-        android:background="@drawable/button_background"
-        android:gravity="center"
-        android:text="Add a Header"
-
-        app:layout_constraintBottom_toBottomOf="@id/view"
-        app:layout_constraintLeft_toLeftOf="@id/view"
-        app:layout_constraintRight_toLeftOf="@id/main_button_register" />
-
+    
 
 </LinearLayout>

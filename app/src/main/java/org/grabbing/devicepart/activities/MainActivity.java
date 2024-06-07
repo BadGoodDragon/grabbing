@@ -18,6 +18,7 @@ import org.grabbing.devicepart.activities.fragments.AccountRegisterFragment;
 import org.grabbing.devicepart.activities.fragments.AddQueryFragment;
 import org.grabbing.devicepart.activities.fragments.FaceManagementFragment;
 import org.grabbing.devicepart.activities.fragments.FaceRegisterFragment;
+import org.grabbing.devicepart.activities.fragments.MyQueriesFragment;
 import org.grabbing.devicepart.data.storage.LongTermStorage;
 import org.grabbing.devicepart.domain.QueryData;
 import org.grabbing.devicepart.dto.QueryInput;
@@ -189,8 +190,10 @@ public class MainActivity extends AppCompatActivity {
         myQueries.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                MyQueriesFragment myQueriesFragment = new MyQueriesFragment();
+                Updater.setMyQueriesFragment(myQueriesFragment);
                 FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
-                transaction.add(R.id.main, new AddQueryFragment());
+                transaction.add(R.id.main, myQueriesFragment);
                 transaction.commit();
             }
         });
