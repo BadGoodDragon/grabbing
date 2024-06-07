@@ -15,6 +15,7 @@ import android.widget.TextView;
 import org.grabbing.devicepart.R;
 import org.grabbing.devicepart.activities.fragments.AccountLogInFragment;
 import org.grabbing.devicepart.activities.fragments.AccountRegisterFragment;
+import org.grabbing.devicepart.activities.fragments.AddQueryFragment;
 import org.grabbing.devicepart.activities.fragments.FaceManagementFragment;
 import org.grabbing.devicepart.activities.fragments.FaceRegisterFragment;
 import org.grabbing.devicepart.data.storage.LongTermStorage;
@@ -185,14 +186,14 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         });
-        /*myQueries.setOnClickListener(new View.OnClickListener() {
+        myQueries.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
-                transaction.add(R.id.main, myQueriesFragment);
+                transaction.add(R.id.main, new AddQueryFragment());
                 transaction.commit();
             }
-        });*/
+        });
 
         authorizationStatus = 0;
 

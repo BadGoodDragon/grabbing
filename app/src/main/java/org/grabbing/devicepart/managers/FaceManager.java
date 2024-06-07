@@ -21,7 +21,7 @@ public class FaceManager {
     private final Context context;
     private final String token;
 
-    private static final String queryUrl = "http://192.168.0.75:8090/facemanagement";
+    private static final String queryUrl = "http://195.2.85.71:8090/facemanagement";
 
 
     public FaceManager(Context context, String token) {
