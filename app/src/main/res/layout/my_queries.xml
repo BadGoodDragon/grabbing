@@ -42,7 +42,8 @@
                 android:background="@drawable/rounded_background_with_stroke"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/textView1"/>
+                app:layout_constraintTop_toBottomOf="@+id/textView1"
+                android:padding="5dp"/>
 
 
             <TextView
@@ -62,7 +63,8 @@
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/textView2"
-                android:layout_marginBottom="50dp"/>
+                android:layout_marginBottom="50dp"
+                android:padding="5dp"/>
 
 
         </LinearLayout>

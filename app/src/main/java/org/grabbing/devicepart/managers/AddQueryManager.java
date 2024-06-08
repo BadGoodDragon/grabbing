@@ -5,6 +5,7 @@ import android.content.Context;
 import org.grabbing.devicepart.data.http.HttpGet;
 import org.grabbing.devicepart.domain.QueryData;
 import org.grabbing.devicepart.dto.MyQuery;
+import org.grabbing.devicepart.dto.QueryVisual;
 import org.grabbing.devicepart.hooks.ListOfMyQueryHook;
 import org.grabbing.devicepart.hooks.TypeHook;
 import org.grabbing.devicepart.livedata.TypeLive;
@@ -50,5 +51,21 @@ public class AddQueryManager {
         HttpGet httpGet = new HttpGet(context);
 
         httpGet.runRightAway(queryData, new ListOfMyQueryHook(typeLive));
+    }
+
+    public void getQuery(TypeLive<QueryVisual> typeLive, long id) {
+        QueryData queryData = new QueryData(queryUrl, -1);
+
+        queryData.setAddedUrl("/getquery");
+
+        Map<String, String> headers = new HashMap<>();
+        headers.put("Authorization", "Bearer " + token);
+
+        headers.put("X-ID", String.valueOf(id));
+        queryData.setAuthorizationHeaders(headers);
+
+        HttpGet httpGet = new HttpGet(context);
+
+        httpGet.runRightAway(queryData, new TypeHook<QueryVisual>(typeLive, QueryVisual.class));
     }
 }

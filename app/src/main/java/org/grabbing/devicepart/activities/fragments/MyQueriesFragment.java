@@ -1,5 +1,6 @@
 package org.grabbing.devicepart.activities.fragments;
 
+import android.app.Activity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -15,7 +16,6 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import org.grabbing.devicepart.R;
 import org.grabbing.devicepart.activities.Updater;
-import org.grabbing.devicepart.activities.recyclerview.ListOfLinkedUsersAdapter;
 import org.grabbing.devicepart.activities.recyclerview.QueryAdapter;
 import org.grabbing.devicepart.data.storage.LongTermStorage;
 import org.grabbing.devicepart.dto.MyQuery;
@@ -52,6 +52,7 @@ public class MyQueriesFragment extends Fragment {
         add.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                Updater.setMyQueriesFragment(null);
                 FragmentTransaction transaction = requireActivity().getSupportFragmentManager().beginTransaction();
                 transaction.add(R.id.my_queries, new AddQueryFragment());
                 transaction.commit();
@@ -74,8 +75,10 @@ public class MyQueriesFragment extends Fragment {
             }
         });
 
+
         thread = new Thread(() -> getAllCallThread(listLive));
         thread.start();
+
 
         return view;
     }
@@ -94,10 +97,13 @@ public class MyQueriesFragment extends Fragment {
 
         List<MyQuery> listDone = typeLive.getData();
         Log.i("list", listDone.toString());
+        if (getActivity() == null || !isAdded()) {
+            return;
+        }
         requireActivity().runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                QueryAdapter customAdapter = new QueryAdapter(listDone);
+                QueryAdapter customAdapter = new QueryAdapter(listDone, requireActivity().getSupportFragmentManager(), getContext());
                 done.setLayoutManager(new LinearLayoutManager(MyQueriesFragment.this.requireActivity().getApplicationContext()));
                 done.setAdapter(customAdapter);
             }
@@ -115,10 +121,13 @@ public class MyQueriesFragment extends Fragment {
 
         List<MyQuery> listInProcess = typeLive.getData();
         Log.i("list", listInProcess.toString());
+        if (getActivity() == null || !isAdded()) {
+            return;
+        }
         requireActivity().runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                QueryAdapter customAdapter = new QueryAdapter(listInProcess);
+                QueryAdapter customAdapter = new QueryAdapter(listInProcess, requireActivity().getSupportFragmentManager(), getContext());
                 inProcess.setLayoutManager(new LinearLayoutManager(MyQueriesFragment.this.requireActivity().getApplicationContext()));
                 inProcess.setAdapter(customAdapter);
             }
@@ -126,6 +135,10 @@ public class MyQueriesFragment extends Fragment {
     }
 
     public void updateCallThread() {
+        Activity activity = getActivity();
+        if (activity == null || !isAdded()) {
+            return;
+        }
         thread = new Thread(() -> getAllCallThread(listLive));
         thread.start();
     }
