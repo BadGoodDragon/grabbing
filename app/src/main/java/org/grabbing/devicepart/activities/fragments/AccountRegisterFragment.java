@@ -40,7 +40,7 @@ public class AccountRegisterFragment extends Fragment {
         password = view.findViewById(R.id.account_register_text_input_layout_password);
 
         thread = new Thread("Register Thread");
-        TypeLive<Boolean> typeLive = new TypeLive<>(false);
+        TypeLive<Boolean> typeLive = new TypeLive<>(null);
 
         typeLive.getStatusLive().observeForever(new Observer<Boolean>() {
             @Override
@@ -80,10 +80,12 @@ public class AccountRegisterFragment extends Fragment {
 
         Boolean currentData = typeLive.getData();
 
-        if (currentData) {
+        if (currentData == null) {
+            errorCallThread("There is no internet connection");
+        } else if (currentData) {
             successCallThread();
         } else {
-            errorCallThread();
+            errorCallThread("Such a user already exists");
         }
     }
 
@@ -91,11 +93,11 @@ public class AccountRegisterFragment extends Fragment {
         getActivity().getSupportFragmentManager().beginTransaction().remove(AccountRegisterFragment.this).commit();
     }
 
-    public void errorCallThread() {
+    public void errorCallThread(String error) {
         requireActivity().runOnUiThread(new Thread() {
             @Override
             public void run() {
-                username.setError("error");
+                username.setError(error);
             }
         });
     }

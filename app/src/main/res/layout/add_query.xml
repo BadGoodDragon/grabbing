@@ -32,7 +32,7 @@
         android:layout_marginRight="20dp"
 
         android:background="@drawable/button_background"
-        android:text="@string/add_add_query"
+        android:text="@string/accept"
         app:layout_constraintBottom_toTopOf="@+id/add_query_button_back"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"

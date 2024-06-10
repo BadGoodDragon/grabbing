@@ -16,6 +16,7 @@ import com.android.volley.toolbox.Volley;
 
 import org.grabbing.devicepart.domain.QueryData;
 import org.grabbing.devicepart.hooks.Hook;
+import org.grabbing.devicepart.livedata.TypeLive;
 
 import java.nio.charset.StandardCharsets;
 import java.util.List;
@@ -122,6 +123,11 @@ public class HttpGet implements HttpQuery {
             @Override
             public void onErrorResponse(VolleyError error) {
                 query.setError(true);
+                if (error.networkResponse == null) {
+                    query.setStatusCode(-1);
+                } else {
+                    query.setStatusCode(error.networkResponse.statusCode);
+                }
                 Log.i("HttpQuery.HttpGet.runRightAway * error", "error");
                 hook.capture(query);
             }
@@ -130,6 +136,73 @@ public class HttpGet implements HttpQuery {
         StringRequest stringRequest = new StringRequest(Request.Method.GET, query.getUrl(), listener, errorListener) {
             @Override
             protected Response<String> parseNetworkResponse(NetworkResponse response) {
+                query.setStatusCode(response.statusCode);
+                query.setResponseHeaders(response.headers);
+
+                return super.parseNetworkResponse(response);
+            }
+
+            @Nullable
+            @Override
+            protected Map<String, String> getParams() throws AuthFailureError {
+                return query.getParameters();
+            }
+
+            @Override
+            public String getBodyContentType() {
+                return "text/plain";
+            }
+
+            @Override
+            public byte[] getBody() throws AuthFailureError {
+                return query.getQueryBody().getBytes(StandardCharsets.UTF_8);
+            }
+
+            @Override
+            public Map<String, String> getHeaders() throws AuthFailureError {
+                return query.getQueryHeaders();
+            }
+        };
+        requestQueue.add(stringRequest);
+    }
+
+    @Override
+    public void runRightAway(QueryData query, Hook hook, TypeLive<Integer> statusCode) {
+        Log.i("HttpQuery.HttpGet.runRightAway * start", query.getUrl());
+
+        Response.Listener<String> listener = new Response.Listener<String>() {
+            @Override
+            public void onResponse(String response) {
+                query.setResponseBody(response);
+                query.setHasResponse(true);
+                Log.i("HttpQuery.HttpGet.runRightAway * response", response);
+                hook.capture(query);
+            }
+        };
+
+        Response.ErrorListener errorListener = new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                query.setError(true);
+                if (error.networkResponse == null) {
+                    statusCode.setData(-1);
+                    query.setStatusCode(-1);
+                } else {
+                    statusCode.setData(error.networkResponse.statusCode);
+                    query.setStatusCode(error.networkResponse.statusCode);
+                }
+                statusCode.setStatus(true);
+                Log.i("HttpQuery.HttpGet.runRightAway * error", "error");
+                hook.capture(query);
+            }
+        };
+
+
+        StringRequest stringRequest = new StringRequest(Request.Method.GET, query.getUrl(), listener, errorListener) {
+            @Override
+            protected Response<String> parseNetworkResponse(NetworkResponse response) {
+                statusCode.setData(response.statusCode);
+                statusCode.setStatus(true);
                 query.setStatusCode(response.statusCode);
                 query.setResponseHeaders(response.headers);
 

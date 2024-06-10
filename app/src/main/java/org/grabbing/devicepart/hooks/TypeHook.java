@@ -25,6 +25,13 @@ public class TypeHook<Type> implements Hook {
 
     @Override
     public void capture(QueryData query) {
+        Log.e("sc", String.valueOf(query.getStatusCode()));
+        if (query.getStatusCode() == -1) {
+            typeLive.setDefaultData();
+            typeLive.setStatus(true);
+            return;
+        }
+
         Gson gson = new Gson();
         Type type;
         if (typeClass != null) {

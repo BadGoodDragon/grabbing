@@ -91,13 +91,17 @@ public class AddQueryFragment extends Fragment {
         add.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Log.e("step", "1");
+                Map<String, String> parametersMap = parametersAdapter.getMap();
+                Map<String, String> headersMap = headersAdapter.getMap();
+
+                parametersMap.remove("");
+                headersMap.remove("");
+
                 NewQuery newQuery = new NewQuery(url.getEditText().getText().toString(),
-                        parametersAdapter.getMap(),
-                        headersAdapter.getMap(),
+                        parametersMap,
+                        headersMap,
                         "",
                         2);
-                Log.i("new-query", newQuery.toString());
                 thread = new Thread(() -> addCallThread(newQuery));
                 thread.start();
             }

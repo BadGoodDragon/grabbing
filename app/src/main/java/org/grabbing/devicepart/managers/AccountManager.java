@@ -24,7 +24,7 @@ public class AccountManager {
 
     public void setQuery(QueryData query) {}
 
-    public void generateToken(String username, String password, TypeLive<String> typeLive) {
+    public void generateToken(String username, String password, TypeLive<String> typeLive, TypeLive<Integer> statusCode) {
         QueryData query = new QueryData(queryUrl, -1);
 
         Map<String, String> body = new HashMap<>();
@@ -38,7 +38,7 @@ public class AccountManager {
 
         HttpQuery httpPost = new HttpPost(context);
 
-        httpPost.runRightAway(query, new TypeHook<String>(typeLive, String.class));
+        httpPost.runRightAway(query, new TypeHook<String>(typeLive, String.class), statusCode);
     }
     public void register(String username, String password, TypeLive<Boolean> typeLive) {
         QueryData query = new QueryData(queryUrl, -1);
