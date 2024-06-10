@@ -38,7 +38,7 @@ public class Updater extends Thread {
             if (faceManagementFragment != null) {
                 faceManagementFragment.updateCallThread();
             }
-            if (myQueriesFragment != null && count % 10 == 0) {
+            if (myQueriesFragment != null && count % 5 == 0) {
                 myQueriesFragment.updateCallThread();
             }
             count++;

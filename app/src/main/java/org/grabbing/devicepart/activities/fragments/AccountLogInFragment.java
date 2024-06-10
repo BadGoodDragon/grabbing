@@ -32,7 +32,6 @@ public class AccountLogInFragment extends Fragment {
         back.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                //finish();
                 getActivity().getSupportFragmentManager().beginTransaction().remove(AccountLogInFragment.this).commit();
             }
         });
@@ -55,22 +54,26 @@ public class AccountLogInFragment extends Fragment {
             }
         });
 
+        TypeLive<Integer> statusCode = new TypeLive<>(-1);
+
+
         logIn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 typeLive.clearAll();
                 thread = new Thread(() -> authorize(username.getEditText().getText().toString(),
-                        password.getEditText().getText().toString(), typeLive));
+                        password.getEditText().getText().toString(), typeLive, statusCode));
                 thread.start();
             }
         });
 
+
         return view;
     }
 
-    private void authorize(String username, String password, TypeLive<String> typeLive) {
+    private void authorize(String username, String password, TypeLive<String> typeLive, TypeLive<Integer> statusCode) {
         AccountManager accountManager = new AccountManager(getContext());
-        accountManager.generateToken(username, password, typeLive);
+        accountManager.generateToken(username, password, typeLive, statusCode);
         synchronized (thread) {
             try {
                 thread.wait();
@@ -81,12 +84,15 @@ public class AccountLogInFragment extends Fragment {
 
         String currentToken = typeLive.getData();
 
-        if (!currentToken.isEmpty()) {
+        if (statusCode.getData().equals(-1)) {
+            errorCallThread("There is no internet connection");
+        } else if (!currentToken.isEmpty()) {
             LongTermStorage.saveToken(currentToken, getContext());
             successCallThread();
             return;
+        } else {
+            errorCallThread("Invalid username or password");
         }
-        errorCallThread();
     }
 
     public void successCallThread() {
@@ -94,11 +100,11 @@ public class AccountLogInFragment extends Fragment {
         getActivity().getSupportFragmentManager().beginTransaction().remove(AccountLogInFragment.this).commit();
     }
 
-    public void errorCallThread() {
+    public void errorCallThread(String error) {
         requireActivity().runOnUiThread(new Thread() {
             @Override
             public void run() {
-                username.setError("error");
+                username.setError(error);
             }
         });
     }

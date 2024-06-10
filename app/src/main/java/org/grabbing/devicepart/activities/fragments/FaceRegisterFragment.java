@@ -39,7 +39,7 @@ public class FaceRegisterFragment extends Fragment {
         name = view.findViewById(R.id.face_register_text_input_layout_name);
 
         thread = new Thread("FaceReg Thread");
-        TypeLive<Boolean> typeLive = new TypeLive<>(false);
+        TypeLive<Boolean> typeLive = new TypeLive<>(null);
 
         typeLive.getStatusLive().observeForever(new Observer<Boolean>() {
             @Override
@@ -79,10 +79,12 @@ public class FaceRegisterFragment extends Fragment {
 
         Boolean currentData = typeLive.getData();
 
-        if (currentData) {
+        if (currentData == null) {
+            errorCallThread("There is no internet connection");
+        } else if (currentData) {
             successCallThread();
         } else {
-            errorCallThread();
+            errorCallThread("Such a face already exists");
         }
     }
 
@@ -91,11 +93,11 @@ public class FaceRegisterFragment extends Fragment {
         getActivity().getSupportFragmentManager().beginTransaction().remove(FaceRegisterFragment.this).commit();
     }
 
-    public void errorCallThread() {
+    public void errorCallThread(String error) {
         requireActivity().runOnUiThread(new Thread() {
             @Override
             public void run() {
-                name.setError("error");
+                name.setError(error);
             }
         });
     }

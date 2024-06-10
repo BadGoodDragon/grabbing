@@ -39,4 +39,5 @@
     <string name="key">Key</string>
     <string name="value">Value</string>
     <string name="add_m_q">Add</string>
+    <string name="accept">Accept</string>
 </resources>
