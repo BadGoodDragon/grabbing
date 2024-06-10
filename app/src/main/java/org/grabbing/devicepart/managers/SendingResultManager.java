@@ -2,42 +2,44 @@ package org.grabbing.devicepart.managers;
 
 import android.content.Context;
 
-import org.grabbing.devicepart.converters.ListOfQueryDataToJson;
+import com.google.gson.Gson;
+
 import org.grabbing.devicepart.data.http.HttpPost;
 import org.grabbing.devicepart.data.http.HttpQuery;
 import org.grabbing.devicepart.domain.QueryData;
 import org.grabbing.devicepart.hooks.EmptyHook;
+import org.grabbing.devicepart.dto.ResponseOutput;
 
-import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class SendingResultManager {
     private final Context context;
-    private List<QueryData> data;
-    private QueryData query;
+    private final String token;
 
-    public SendingResultManager(Context context) {
+
+    private static final String queryUrl = "http://192.168.0.75:8090/returningresults";
+
+    public SendingResultManager(Context context, String token) {
         this.context = context;
+        this.token = token;
     }
 
-    public void setData(List<QueryData> data) {this.data = data;}
-    public void setQuery(QueryData query) {this.query = query;}
+    public void run(List<ResponseOutput> data) {
+        QueryData query = new QueryData(queryUrl, -1);
 
-    public void run() {
-        ListOfQueryDataToJson listOfQueryDataToJson = new ListOfQueryDataToJson();
-        listOfQueryDataToJson.setData(data);
-        listOfQueryDataToJson.convert();
+        Gson gson = new Gson();
 
-        query.setQueryBody(listOfQueryDataToJson.getJson());
+        Map<String, String> headers = new HashMap<>();
+        headers.put("Authorization", "Bearer " + token);
+        query.setAuthorizationHeaders(headers);
+
+        query.setQueryBody(gson.toJson(data));
         query.setAddedUrl("/send");
-
-
 
         HttpQuery httpPost = new HttpPost(context);
 
         httpPost.runRightAway(query, new EmptyHook());
     }
-
-    public List<QueryData> getData() {return data;}
-    public QueryData getQuery() {return query;}
 }

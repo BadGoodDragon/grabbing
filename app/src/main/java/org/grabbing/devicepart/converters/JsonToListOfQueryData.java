@@ -4,9 +4,8 @@ import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
 import org.grabbing.devicepart.domain.QueryData;
-import org.grabbing.devicepart.jsonforconversion.QueryInput;
+import org.grabbing.devicepart.dto.QueryInput;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class JsonToListOfQueryData {

@@ -31,4 +31,12 @@
     <string name="my_queries">My Queries</string>
     <string name="add">Add</string>
     <string name="update">Update</string>
+    <string name="add_add_query">Add</string>
+    <string name="url">Url</string>
+    <string name="add_query">Add Query</string>
+    <string name="headers">Headers</string>
+    <string name="parameters">Parameters</string>
+    <string name="key">Key</string>
+    <string name="value">Value</string>
+    <string name="add_m_q">Add</string>
 </resources>

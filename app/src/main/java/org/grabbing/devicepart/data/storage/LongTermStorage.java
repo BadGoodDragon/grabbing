@@ -6,12 +6,12 @@ import android.content.SharedPreferences;
 import org.grabbing.devicepart.domain.QueryData;
 
 public class LongTermStorage {
-    public static final QueryData queryReceiptManagerQuery = new QueryData("http://192.168.0.75:8090/receivingqueries", -2);
-    public static final QueryData sendingResultManagerQuery = new QueryData("http://192.168.0.75:8090/returningresults", -3);
-    public static final QueryData faceManagerQuery = new QueryData("http://192.168.0.75:8090/facemanagement", -4);
-    public static final QueryData checkManagerQuery = new QueryData("http://192.168.0.75:8090/checkmanagement", -5);
-    public static final QueryData accountQuery = new QueryData("http://192.168.0.75:8090/accountmanagement", -6);
-    public static final QueryData addQuery = new QueryData("http://192.168.0.75:8090/addingqueries", -7);
+    /*public static final QueryData queryReceiptManagerQuery = new QueryData("http://195.2.85.71:8090/receivingqueries", -2);
+    public static final QueryData sendingResultManagerQuery = new QueryData("http://195.2.85.71:8090/returningresults", -3);
+    public static final QueryData faceManagerQuery = new QueryData("http://195.2.85.71:8090/facemanagement", -4);
+    public static final QueryData checkManagerQuery = new QueryData("http://195.2.85.71:8090/checkmanagement", -5);
+    public static final QueryData accountQuery = new QueryData("http://195.2.85.71:8090/accountmanagement", -6);
+    public static final QueryData addQuery = new QueryData("http://195.2.85.71:8090/addingqueries", -7);*/
 
 
     private static final String PREF_NAME = "data";
@@ -26,7 +26,7 @@ public class LongTermStorage {
 
     public static String getToken(Context context) {
         SharedPreferences prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE);
-        return prefs.getString(KEY_SAVED_TOKEN, null);
+        return prefs.getString(KEY_SAVED_TOKEN, "no token");
     }
 
     public static void deleteToken(Context context) {
@@ -48,7 +48,7 @@ public class LongTermStorage {
 
     public static String getUsername(Context context) {
         SharedPreferences prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE);
-        return prefs.getString(KEY_SAVED_USERNAME, null);
+        return prefs.getString(KEY_SAVED_USERNAME, "no un");
     }
 
     public static boolean hasSavedUsername(Context context) {

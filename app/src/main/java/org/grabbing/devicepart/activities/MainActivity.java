@@ -1,40 +1,49 @@
 package org.grabbing.devicepart.activities;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.app.AppCompatDelegate;
 import androidx.fragment.app.FragmentTransaction;
 import androidx.lifecycle.Observer;
 
-import android.content.Context;
-import android.content.Intent;
-import android.graphics.Color;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.GestureDetector;
-import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
-import android.widget.Toast;
 
-import org.grabbing.devicepart.Executor;
 import org.grabbing.devicepart.R;
 import org.grabbing.devicepart.activities.fragments.AccountLogInFragment;
 import org.grabbing.devicepart.activities.fragments.AccountRegisterFragment;
+import org.grabbing.devicepart.activities.fragments.AddQueryFragment;
 import org.grabbing.devicepart.activities.fragments.FaceManagementFragment;
 import org.grabbing.devicepart.activities.fragments.FaceRegisterFragment;
 import org.grabbing.devicepart.activities.fragments.MyQueriesFragment;
 import org.grabbing.devicepart.data.storage.LongTermStorage;
-import org.grabbing.devicepart.data.storage.StaticStorage;
-import org.grabbing.devicepart.livedata.BooleanLive;
-import org.grabbing.devicepart.livedata.IntegerLive;
-import org.grabbing.devicepart.livedata.ListOfUsersLive;
-import org.grabbing.devicepart.livedata.QueryDataListLive;
-import org.grabbing.devicepart.livedata.StringLive;
-import org.grabbing.devicepart.managers.UIManager;
-import org.grabbing.devicepart.wrappers.QuickCompletion;
+import org.grabbing.devicepart.domain.QueryData;
+import org.grabbing.devicepart.dto.QueryInput;
+import org.grabbing.devicepart.dto.ResponseOutput;
+import org.grabbing.devicepart.livedata.TypeLive;
+import org.grabbing.devicepart.managers.CheckManager;
+import org.grabbing.devicepart.managers.FaceManager;
+import org.grabbing.devicepart.managers.QueryExecutionManager;
+import org.grabbing.devicepart.managers.QueryReceiptManager;
+import org.grabbing.devicepart.managers.SendingResultManager;
+
+import java.util.ArrayList;
+import java.util.List;
+
 
 public class MainActivity extends AppCompatActivity {
+    private final static String IN_PROCESS_KEY = "IN_PROCESS_KEY";
+
+    private boolean inProcess;
+    private int authorizationStatus;
+    private String faceName;
+
+    private Thread thread;
+    private Thread executeThread;
+
     private Button logIn;
     private Button register;
     private Button registerFace;
@@ -46,8 +55,11 @@ public class MainActivity extends AppCompatActivity {
     private TextView name;
     private TextView status;
 
-    private static boolean isStart;
-    private static QuickCompletion quickCompletion;
+    private TypeLive<Integer> integerLive;
+    private TypeLive<String> stringLive;
+
+
+    FaceManagementFragment faceManagementFragment;
 
 
 
@@ -56,25 +68,15 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
 
-        initUIStepFirst();
+        if (savedInstanceState != null) {
+            inProcess = savedInstanceState.getBoolean(IN_PROCESS_KEY, false);
+        } else {
+            inProcess = false;
+        }
 
-        Executor executor = new Executor(this);
-        initExecutor(executor);
-        StaticStorage.setExecutor(executor);
 
-        checkToken();
-
-        isStart = false;
-
-        initUIStepSecond();
-
-        runUpdater();
-
-        StaticStorage.setMainActivity(this);
-    }
-
-    private void initUIStepFirst() {
         setContentView(R.layout.main);
+
 
         logIn = findViewById(R.id.main_button_log_in);
         register = findViewById(R.id.main_button_register);
@@ -86,25 +88,13 @@ public class MainActivity extends AppCompatActivity {
         username = findViewById(R.id.main_text_username);
         name = findViewById(R.id.main_text_name);
         status = findViewById(R.id.main_text_status);
-    }
-    private void initUIStepSecond() {
-        AccountLogInFragment accountLogInFragment = new AccountLogInFragment();
-        AccountRegisterFragment accountRegisterFragment = new AccountRegisterFragment();
-        FaceManagementFragment faceManagementFragment = new FaceManagementFragment();
-        FaceRegisterFragment faceRegisterFragment = new FaceRegisterFragment();
-        MyQueriesFragment myQueriesFragment = new MyQueriesFragment();
 
-        StaticStorage.setAccountLogInFragment(accountLogInFragment);
-        StaticStorage.setAccountRegisterFragment(accountRegisterFragment);
-        StaticStorage.setFaceManagementFragment(faceManagementFragment);
-        StaticStorage.setFaceRegisterFragment(faceRegisterFragment);
-        StaticStorage.setMyQueriesFragment(myQueriesFragment);
 
         logIn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                /*Intent intent = new Intent(MainActivity.this, AccountLogInActivity.class);
-                startActivity(intent);*/
+                AccountLogInFragment accountLogInFragment = new AccountLogInFragment();
+
                 FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
                 transaction.add(R.id.main, accountLogInFragment);
                 transaction.commit();
@@ -113,8 +103,8 @@ public class MainActivity extends AppCompatActivity {
         register.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                /*Intent intent = new Intent(MainActivity.this, AccountRegisterActivity.class);
-                startActivity(intent);*/
+                AccountRegisterFragment accountRegisterFragment = new AccountRegisterFragment();
+
                 FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
                 transaction.add(R.id.main, accountRegisterFragment);
                 transaction.commit();
@@ -123,545 +113,294 @@ public class MainActivity extends AppCompatActivity {
         registerFace.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                /*Intent intent = new Intent(MainActivity.this, FaceRegisterActivity.class);
-                startActivity(intent);*/
+                FaceRegisterFragment faceRegisterFragment = new FaceRegisterFragment();
+
                 FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
                 transaction.add(R.id.main, faceRegisterFragment);
                 transaction.commit();
             }
         });
+
         management.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                /*Intent intent = new Intent(MainActivity.this, FaceManagementActivity.class);
-                startActivity(intent);*/
+                faceManagementFragment = new FaceManagementFragment();
+
+                Updater.setFaceManagementFragment(faceManagementFragment);
                 FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
                 transaction.add(R.id.main, faceManagementFragment);
                 transaction.commit();
             }
         });
 
-        start.setOnClickListener(new View.OnClickListener() {
+        thread = new Thread("Main Background Thread");
+        executeThread = new Thread("Exe Thread");
+
+        if (inProcess) {
+            start.setBackgroundResource(R.drawable.running_button_background);
+            start.setText("Stop");
+        } else {
+            start.setBackgroundResource(R.drawable.button_background);
+            start.setText("Start");
+        }
+
+
+        TypeLive<List<QueryInput>> listQueryInputLive = new TypeLive<>(new ArrayList<>());
+        listQueryInputLive.getStatusLive().observeForever(new Observer<Boolean>() {
             @Override
-            public void onClick(View v) {
-                startButtonOnClick();
+            public void onChanged(Boolean status) {
+                if (status) {
+                    synchronized (executeThread) {
+                        executeThread.notify();
+                    }
+                }
             }
         });
 
+        TypeLive<List<QueryData>> listQueryDataLive = new TypeLive<>(new ArrayList<>());
+        listQueryDataLive.getStatusLive().observeForever(new Observer<Boolean>() {
+            @Override
+            public void onChanged(Boolean status) {
+                if (status) {
+                    synchronized (executeThread) {
+                        executeThread.notify();
+                    }
+                }
+            }
+        });
+
+        start.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (inProcess) {
+                    inProcess = false;
+                    start.setBackgroundResource(R.drawable.button_background);
+                    start.setText("Start");
+                } else {
+                    Log.i("step", "1");
+                    inProcess = true;
+                    executeThread = new Thread(() -> executeQueries(listQueryInputLive,
+                                                            listQueryDataLive));
+                    executeThread.start();
+                    start.setBackgroundResource(R.drawable.running_button_background);
+                    start.setText("Stop");
+                }
+            }
+        });
         myQueries.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                MyQueriesFragment myQueriesFragment = new MyQueriesFragment();
+                Updater.setMyQueriesFragment(myQueriesFragment);
                 FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
                 transaction.add(R.id.main, myQueriesFragment);
                 transaction.commit();
             }
         });
-    }
 
-    private void startButtonOnClick() {
-        if (!isStart) {
-            isStart = true;
+        authorizationStatus = 0;
 
-            quickCompletion = new QuickCompletion();
-            StaticStorage.getExecutor().executeQueries(quickCompletion);
-            StaticStorage.getUpdater().setOnRun(false);
-
-            start.setBackgroundResource(R.drawable.running_button_background);
-            start.setText("Stop");
-
-        } else {
-            isStart = false;
-
-            quickCompletion.setStop(true);
-            StaticStorage.getUpdater().setOnRun(true);
-
-
-            start.setBackgroundResource(R.drawable.button_background);
-            start.setText("Start");
-        }
-    }
-    public void setStartButtonOnClickErrorCallThread() {
-        isStart = false;
-        quickCompletion.setStop(true);
-        StaticStorage.getUpdater().setOnRun(true);
-
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                start.setBackgroundResource(R.drawable.button_background);
-                start.setText("Start");
-                status.setText("Error");
-            }
-        });
-    }
-
-    private void runUpdater() {
-        if (StaticStorage.getUpdater() == null) {
-            Updater updater = new Updater();
-            //updater.setActivitiesActions(this);
-            updater.start();
-            StaticStorage.setUpdater(updater);
-        }
-    }
-
-    private void initExecutor(Executor executor) {
-        QueryDataListLive listLive = new QueryDataListLive();
-        StringLive tokenLive = new StringLive();
-        ListOfUsersLive usersLive = new ListOfUsersLive();
-        BooleanLive booleanLive = new BooleanLive();
-        IntegerLive integerLive = new IntegerLive();
-        StringLive stringLive = new StringLive();
-        ListOfUsersLive qLive = new ListOfUsersLive();
-        listLive.getStatusLive().observeForever(new Observer<Boolean>() {
-            @Override
-            public void onChanged(Boolean v) {
-                if (v) {
-                    executor.resumeRunningThread();
-                }
-            }
-        });
-        tokenLive.getStatusLive().observeForever(new Observer<Boolean>() {
-            @Override
-            public void onChanged(Boolean v) {
-                if (v) {
-                    executor.resumeRunningThread();
-                }
-            }
-        });
-        usersLive.getStatusLive().observeForever(new Observer<Boolean>() {
-            @Override
-            public void onChanged(Boolean v) {
-                if (v) {
-                    executor.resumeRunningThread();
-                }
-            }
-        });
-        booleanLive.getStatusLive().observeForever(new Observer<Boolean>() {
-            @Override
-            public void onChanged(Boolean v) {
-                if (v) {
-                    executor.resumeRunningThread();
-                }
-            }
-        });
+        integerLive = new TypeLive<>(0);
         integerLive.getStatusLive().observeForever(new Observer<Boolean>() {
             @Override
-            public void onChanged(Boolean v) {
-                if (v) {
-                    executor.resumeRunningThread();
+            public void onChanged(Boolean status) {
+                if (status) {
+                    synchronized (thread) {
+                        thread.notify();
+                    }
                 }
             }
         });
+
+        stringLive = new TypeLive<>("");
         stringLive.getStatusLive().observeForever(new Observer<Boolean>() {
             @Override
-            public void onChanged(Boolean v) {
-                if (v) {
-                    executor.resumeRunningThread();
-                }
-            }
-        });
-        qLive.getStatusLive().observeForever(new Observer<Boolean>() {
-            @Override
-            public void onChanged(Boolean v) {
-                if (v) {
-                    executor.resumeRunningThread();
+            public void onChanged(Boolean status) {
+                if (status) {
+                    synchronized (thread) {
+                        thread.notify();
+                    }
                 }
             }
         });
 
-        executor.setUsersLive(usersLive);
-        executor.setListLive(listLive);
-        executor.setTokenLive(tokenLive);
-        executor.setBooleanLive(booleanLive);
-        executor.setIntegerLive(integerLive);
-        executor.setStringLive(stringLive);
-        executor.setMyQueryLive(qLive);
-
-
-        executor.init(LongTermStorage.accountQuery,
-                LongTermStorage.queryReceiptManagerQuery,
-                LongTermStorage.sendingResultManagerQuery,
-                LongTermStorage.faceManagerQuery,
-                LongTermStorage.checkManagerQuery,
-                LongTermStorage.addQuery);
-
-        executor.start();
-
-    }
-
-    private void checkToken() {
-        Executor executor = StaticStorage.getExecutor();
-
-        if (LongTermStorage.hasSavedToken(this)) {
-            Log.i("token", LongTermStorage.getToken(this.getApplicationContext()));
-
-            /*username.setText("Loading ...");
-            name.setText("Loading ...");
-            status.setText("Wait ...");*/
-
-            executor.setToken(LongTermStorage.getToken(this.getApplicationContext()));
-            executor.check();
-        } else {
-            StaticStorage.setHasFace(false);
-            username.setText("Not authorized");
-            name.setText("Not authorized");
-            status.setText("Not ready to work");
+        Updater.setMainActivity(this);
+        if (!Updater.isOnRun()) {
+            Updater updater = new Updater();
+            updater.start();
         }
     }
 
-    public void setCheckTokenResultCallThread(int status) {
-        Log.i("Status", String.valueOf(status));
-        if (status == 0) {
+    @Override
+    public void onSaveInstanceState(@NonNull Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putBoolean(IN_PROCESS_KEY, inProcess);
+    }
+
+    private void checkAuthorizationStatus(TypeLive<Integer> typeLive) {
+        CheckManager checkManager = new CheckManager(getApplicationContext(), LongTermStorage.getToken(getApplicationContext()));
+        checkManager.check(typeLive);
+
+        synchronized (thread) {
+            try {
+                thread.wait();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+
+        authorizationStatus = typeLive.getData();
+
+        visualizeAuthorizationStatusCallThread(authorizationStatus);
+    }
+
+    private void getFaceName(TypeLive<String> typeLive) {
+        FaceManager faceManager = new FaceManager(getApplicationContext(), LongTermStorage.getToken(getApplicationContext()));
+        faceManager.getCurrentName(typeLive);
+        synchronized (thread) {
+            try {
+                thread.wait();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+
+        String currentFaceName = typeLive.getData();
+        faceName = currentFaceName;
+
+        name.setText(faceName);
+    }
+
+    private void executeQueries(TypeLive<List<QueryInput>> listQueryInputLive,
+                                TypeLive<List<QueryData>> listQueryDataLive) {
+        Log.i("step", "2");
+        QueryReceiptManager queryReceiptManager =
+                new QueryReceiptManager(getApplicationContext(), LongTermStorage.getToken(getApplicationContext()));
+        QueryExecutionManager queryExecutionManager =
+                new QueryExecutionManager(getApplicationContext());
+        SendingResultManager sendingResultManager =
+                new SendingResultManager(getApplicationContext(), LongTermStorage.getToken(getApplicationContext()));
+        Log.i("step", "3");
+
+        for (;inProcess;) {
+            Log.i("executeQueries", "check");
+            Log.i("authorizationStatus", String.valueOf(authorizationStatus));
+
+            if (authorizationStatus != 3) {
+                Log.e("executeQueries", "authorizationStatus != 3");
+
+                inProcess = false;
+                start.setBackgroundResource(R.drawable.button_background);
+                start.setText("Error");
+
+                return;
+            }
+            Log.i("step", "4");
+            listQueryInputLive.clearAll();
+            listQueryDataLive.clearAll();
+
+            Log.i("executeQueries", "get");
+            queryReceiptManager.run(listQueryInputLive);
+            Log.i("step", "5");
+            synchronized (executeThread) {
+                try {
+                    executeThread.wait();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+            Log.i("step", "6");
+            if (listQueryInputLive.getData().isEmpty()) {
+                Log.i("executeQueries", "continue");
+                continue;
+            }
+            Log.i("step", "7");
+
+            List<QueryData> inputData = new ArrayList<>();
+            for (QueryInput queryInput : listQueryInputLive.getData()) {
+                QueryData queryData = new QueryData(queryInput.getUrl(), queryInput.getId());
+                queryData.setParameters(queryInput.getParameters());
+                queryData.setQueryHeaders(queryInput.getQueryHeaders());
+                queryData.setQueryBody(queryInput.getQueryBody());
+                inputData.add(queryData);
+            }
+            Log.i("step", "8");
+
+            Log.i("executeQueries", "run");
+
+            queryExecutionManager.setData(inputData);
+            queryExecutionManager.setOutputData(listQueryDataLive);
+            queryExecutionManager.run();
+
+            synchronized (executeThread) {
+                try {
+                    executeThread.wait();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+
+            List<ResponseOutput> outputData = new ArrayList<>();
+            for (QueryData queryData : listQueryDataLive.getData()) {
+                outputData
+                        .add(
+                                new ResponseOutput(
+                                        queryData.getId(),
+                                        queryData.getStatusCode(),
+                                        queryData.getResponseHeaders(),
+                                        queryData.getResponseBody(),
+                                        queryData.isError()
+                                )
+                        );
+            }
+
+            Log.i("executeQueries", "set");
+            sendingResultManager.run(outputData);
+        }
+        Log.i("step", "4");
+
+    }
+
+    public void updateCallThread() {
+        integerLive.clearAll();
+        Log.i("token", LongTermStorage.getToken(getApplicationContext()));
+        thread = new Thread(() -> checkAuthorizationStatus(integerLive));
+        thread.start();
+    }
+
+    private void visualizeAuthorizationStatusCallThread(int authorizationStatus) {
+        Log.i("authorizationStatus", String.valueOf(authorizationStatus));
+        if (authorizationStatus == 1) {
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    StaticStorage.setHasFace(false);
+                    username.setText(LongTermStorage.getUsername(MainActivity.this));
+                    name.setText("Not authorized");
+                    MainActivity.this.status.setText("Not ready to work");
+                }
+            });
+        } else if (authorizationStatus == 3) {
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    username.setText(LongTermStorage.getUsername(MainActivity.this));
+                    MainActivity.this.status.setText("Ready to work");
+                }
+            });
+            stringLive.clearAll();
+            getFaceName(stringLive);
+
+        } else {
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
                     username.setText("Not authorized");
                     name.setText("Not authorized");
                     MainActivity.this.status.setText("Not ready to work");
                 }
             });
 
-            LongTermStorage.deleteToken(this);
-            LongTermStorage.deleteUsername(this);
-        } else if (status == 1) {
-            runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    StaticStorage.setHasFace(false);
-                    username.setText(LongTermStorage.getUsername(MainActivity.this));
-                    name.setText("Not authorized");
-                    MainActivity.this.status.setText("Not ready to work");
-                }
-            });
-        } else if (status == 3) {
-            runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    StaticStorage.setHasFace(true);
-                    username.setText(LongTermStorage.getUsername(MainActivity.this));
-                    //name.setText("Loading ...");
-                    MainActivity.this.status.setText("Ready to work");
-                }
-            });
-
-            Executor executor = StaticStorage.getExecutor();
-            executor.getFaceName();
         }
-    }
-    public void setFaceNameCallThread(String faceName) {
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                name.setText(faceName);
-            }
-        });
-    }
-
-    public void updateCallThread() {
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                checkToken();
-            }
-        });
     }
 }
 
-/*public class MainActivity extends AppCompatActivity implements ActivitiesActions {
-
-    private Button logIn;
-    private Button register;
-    private Button registerFace;
-    private Button management;
-    private Button start;
-
-    private TextView username;
-    private TextView name;
-    private TextView status;
-
-    private int code = -1;
-    private String faceName = "not authorized";
-
-    private static boolean isStart = false;
-    private static QuickCompletion quickCompletion;
-
-    private boolean hasToken;
-
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.main);
-
-        logIn = findViewById(R.id.main_button_log_in);
-        register = findViewById(R.id.main_button_register);
-        registerFace = findViewById(R.id.main_button_register_face);
-        management = findViewById(R.id.main_button_management);
-        start = findViewById(R.id.main_button_start_stop);
-
-        username = findViewById(R.id.main_text_username);
-        name = findViewById(R.id.main_text_name);
-        status = findViewById(R.id.main_text_status);
-
-        UIManager.setCurrentActivity(this);
-        UIManager.setMainActivity(this);
-
-        Executor executor = new Executor(this.getApplicationContext());
-
-        initExecutor(executor);
-
-        StaticStorage.setExecutor(executor);
-
-        if (LongTermStorage.hasSavedToken(this.getApplicationContext())) {
-            executor.setToken(LongTermStorage.getToken(this.getApplicationContext()));
-            Log.i("token", LongTermStorage.getToken(this.getApplicationContext()));
-            executor.check();
-        } else {
-            username.setText("not authorized");
-            name.setText("not authorized");
-        }
-
-
-
-        logIn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(MainActivity.this, AccountLogInActivity.class);
-                startActivity(intent);
-            }
-        });
-        register.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(MainActivity.this, AccountRegisterActivity.class);
-                startActivity(intent);
-            }
-        });
-        registerFace.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(MainActivity.this, FaceRegisterActivity.class);
-                startActivity(intent);
-            }
-        });
-        management.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(MainActivity.this, FaceManagementActivity.class);
-                startActivity(intent);
-            }
-        });
-
-        start.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (!isStart) {
-                    isStart = true;
-                    quickCompletion = new QuickCompletion();
-                    executor.executeQueries(quickCompletion);
-                } else {
-                    isStart = false;
-                    start.setBackgroundColor(Color.parseColor("#10DF0C"));
-                    quickCompletion.setStop(true);
-                    status.setText("Start");
-                }
-            }
-        });
-
-        View view = findViewById(R.id.main);
-        SwipeListener swipeListener = new SwipeListener(this);
-        view.setOnTouchListener(swipeListener);
-
-    }
-
-    private void initExecutor(Executor executor) {
-        QueryDataListLive listLive = new QueryDataListLive();
-        StringLive tokenLive = new StringLive();
-        ListOfUsersLive usersLive = new ListOfUsersLive();
-        BooleanLive booleanLive = new BooleanLive();
-        IntegerLive integerLive = new IntegerLive();
-        StringLive stringLive = new StringLive();
-        listLive.getStatusLive().observeForever(new Observer<Boolean>() {
-            @Override
-            public void onChanged(Boolean v) {
-                if (v) {
-                    executor.resumeRunningThread();
-                }
-            }
-        });
-        tokenLive.getStatusLive().observeForever(new Observer<Boolean>() {
-            @Override
-            public void onChanged(Boolean v) {
-                if (v) {
-                    executor.resumeRunningThread();
-                }
-            }
-        });
-        usersLive.getStatusLive().observeForever(new Observer<Boolean>() {
-            @Override
-            public void onChanged(Boolean v) {
-                if (v) {
-                    executor.resumeRunningThread();
-                }
-            }
-        });
-        booleanLive.getStatusLive().observeForever(new Observer<Boolean>() {
-            @Override
-            public void onChanged(Boolean v) {
-                if (v) {
-                    executor.resumeRunningThread();
-                }
-            }
-        });
-        integerLive.getStatusLive().observeForever(new Observer<Boolean>() {
-            @Override
-            public void onChanged(Boolean v) {
-                if (v) {
-                    executor.resumeRunningThread();
-                }
-            }
-        });
-        stringLive.getStatusLive().observeForever(new Observer<Boolean>() {
-            @Override
-            public void onChanged(Boolean v) {
-                if (v) {
-                    executor.resumeRunningThread();
-                }
-            }
-        });
-
-        executor.setUsersLive(usersLive);
-        executor.setListLive(listLive);
-        executor.setTokenLive(tokenLive);
-        executor.setBooleanLive(booleanLive);
-        executor.setIntegerLive(integerLive);
-        executor.setStringLive(stringLive);
-
-
-        executor.init(LongTermStorage.accountQuery,
-                LongTermStorage.queryReceiptManagerQuery,
-                LongTermStorage.sendingResultManagerQuery,
-                LongTermStorage.faceManagerQuery,
-                LongTermStorage.checkManagerQuery);
-
-        executor.start();
-
-    }
-
-    @Override
-    public void finishNow() {
-        throw new RuntimeException("not call finishNow in MainActivity");
-    }
-
-    @Override
-    public void setError(String error) {
-        Toast.makeText(this.getApplicationContext(), error, Toast.LENGTH_LONG).show();
-    }
-
-    public void setFaceName(String name) {
-        runOnUiThread(new Thread() {
-            @Override
-            public void run() {
-                MainActivity.this.name.setText(name);
-            }
-        });
-    }
-
-    public void setAuthStatus(int n) {
-        if (n == 0) {
-            runOnUiThread(new Thread() {
-                @Override
-                public void run() {
-                    username.setText("not authorized");
-                    name.setText("not authorized");
-                    status.setText("Not ready to work");
-                }
-            });
-        } else if (n == 1) {
-            runOnUiThread(new Thread() {
-                @Override
-                public void run() {
-                    username.setText(LongTermStorage.getUsername(MainActivity.this.getApplicationContext()));
-                    name.setText("not authorized");
-                    status.setText("Not ready to work");
-                }
-            });
-        } else if (n == 3) {
-            runOnUiThread(new Thread() {
-                @Override
-                public void run() {
-                    username.setText(LongTermStorage.getUsername(MainActivity.this.getApplicationContext()));
-                    name.setText("loading...");
-                    status.setText("Ready to work");
-                }
-            });
-            StaticStorage.getExecutor().getFaceName();
-        }
-    }
-
-    public void setToken(String token) {
-        LongTermStorage.saveToken(token, this.getApplicationContext());
-    }
-
-    public class SwipeListener implements View.OnTouchListener {
-
-        private final GestureDetector gestureDetector;
-
-        public SwipeListener(Context context) {
-            gestureDetector = new GestureDetector(context, new GestureListener());
-        }
-
-        @Override
-        public boolean onTouch(View v, MotionEvent event) {
-            return gestureDetector.onTouchEvent(event);
-        }
-
-        private final class GestureListener extends GestureDetector.SimpleOnGestureListener {
-
-            private static final int SWIPE_THRESHOLD = 100;
-            private static final int SWIPE_VELOCITY_THRESHOLD = 100;
-
-            @Override
-            public boolean onDown(MotionEvent e) {
-                return true;
-            }
-
-            @Override
-            public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
-                boolean result = false;
-                try {
-                    float diffY = e2.getY() - e1.getY();
-                    if (Math.abs(diffY) > SWIPE_THRESHOLD && Math.abs(velocityY) > SWIPE_VELOCITY_THRESHOLD) {
-                        if (diffY > 0) {
-                            onSwipeDown();
-                        }
-                    }
-                    result = true;
-                } catch (Exception exception) {
-                    exception.printStackTrace();
-                }
-                return result;
-            }
-        }
-
-        public void onSwipeDown() {
-            update();
-        }
-    }
-
-    public void update() {
-        StaticStorage.getExecutor().check();
-    }
-
-    public void setButtonStatus(boolean v) {
-        if (v) {
-            start.setBackgroundColor(Color.GRAY);
-            start.setText("Stop");
-            isStart = true;
-        } else {
-            status.setText("Error");
-            isStart = false;
-        }
-    }
-
-}*/

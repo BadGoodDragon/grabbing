@@ -1,28 +1,80 @@
 package org.grabbing.devicepart.managers;
 
 import android.content.Context;
-import android.util.Log;
 
 import com.google.gson.Gson;
 
 import org.grabbing.devicepart.data.http.HttpPost;
 import org.grabbing.devicepart.data.http.HttpQuery;
 import org.grabbing.devicepart.domain.QueryData;
-import org.grabbing.devicepart.hooks.BooleanHook;
-import org.grabbing.devicepart.livedata.BooleanLive;
-import org.grabbing.devicepart.livedata.StringLive;
-import org.grabbing.devicepart.hooks.AccountManagerHook;
+import org.grabbing.devicepart.hooks.TypeHook;
+import org.grabbing.devicepart.livedata.TypeLive;
 
-import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
 
 public class AccountManager {
     private final Context context;
+    private static final String queryUrl = "http://192.168.0.75:8090/accountmanagement";
+
+
+    public AccountManager(Context context) {
+        this.context = context;
+    }
+
+    public void setQuery(QueryData query) {}
+
+    public void generateToken(String username, String password, TypeLive<String> typeLive) {
+        QueryData query = new QueryData(queryUrl, -1);
+
+        Map<String, String> body = new HashMap<>();
+        body.put("username", username);
+        body.put("password", password);
+
+        Gson gson = new Gson();
+
+        query.setQueryBody(gson.toJson(body));
+        query.setAddedUrl("/generatetoken");
+
+        HttpQuery httpPost = new HttpPost(context);
+
+        httpPost.runRightAway(query, new TypeHook<String>(typeLive, String.class));
+    }
+    public void register(String username, String password, TypeLive<Boolean> typeLive) {
+        QueryData query = new QueryData(queryUrl, -1);
+
+        Map<String, String> headers = new HashMap<>();
+        headers.put("X-Username", username);
+        headers.put("X-Password", password);
+
+        query.setRegistrationHeaders(headers);
+        query.setAddedUrl("/register");
+
+        HttpQuery httpPost = new HttpPost(context);
+
+        httpPost.runRightAway(query, new TypeHook<Boolean>(typeLive, Boolean.class));
+    }
+
+    public static QueryData authorizeQuery(QueryData unauthorizedQuery, String token) {
+        Map<String, String> headers = new HashMap<>();
+        headers.put("Authorization", "Bearer " + token);
+
+        unauthorizedQuery.setAuthorizationHeaders(headers);
+
+        return unauthorizedQuery;
+    }
+
+
+
+}
+
+
+/*public class AccountManager {
+    private final Context context;
     private StringLive token;
     private BooleanLive booleanLive;
     private QueryData query;
-    private AccountManagerHook hook;
+    private TypeHook<String> hook;
 
 
     public AccountManager(Context context) {
@@ -87,4 +139,4 @@ public class AccountManager {
         return unauthorizedQuery;
     }
 
-}
+}*/

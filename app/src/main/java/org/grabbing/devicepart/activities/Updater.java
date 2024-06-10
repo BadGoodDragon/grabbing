@@ -2,15 +2,30 @@ package org.grabbing.devicepart.activities;
 
 import android.util.Log;
 
-import org.grabbing.devicepart.data.storage.StaticStorage;
+import org.grabbing.devicepart.activities.fragments.FaceManagementFragment;
+import org.grabbing.devicepart.activities.fragments.MyQueriesFragment;
 
 public class Updater extends Thread {
-    private boolean onRun = true;
+    private static boolean onRun = false;
 
-    private final int DELAY = 1000;
+    public static boolean isOnRun() {return onRun;}
+
+    private static MainActivity mainActivity;
+    private static FaceManagementFragment faceManagementFragment;
+    private static MyQueriesFragment myQueriesFragment;
+
+    public static void setMainActivity(MainActivity mainActivity) {Updater.mainActivity = mainActivity;}
+    public static void setFaceManagementFragment(FaceManagementFragment faceManagementFragment) {Updater.faceManagementFragment = faceManagementFragment;}
+    public static void setMyQueriesFragment(MyQueriesFragment myQueriesFragment) {Updater.myQueriesFragment = myQueriesFragment;}
+
+    private static final int DELAY = 1000;
+
+    private int count;
 
     @Override
     public void run() {
+        count = 0;
+        onRun = true;
         for (;;) {
             try {
                 Thread.sleep(DELAY);
@@ -18,16 +33,15 @@ public class Updater extends Thread {
                 e.printStackTrace();
             }
             Log.i("update", "update");
-            if (onRun) {
-                StaticStorage.getMainActivity().updateCallThread();
-                if (StaticStorage.getFaceManagementFragment() != null) {
-                    StaticStorage.getFaceManagementFragment().updateCallThread();
-                }
-            }
-        }
-    }
 
-    public void setOnRun(boolean onRun) {
-        this.onRun = onRun;
+            mainActivity.updateCallThread();
+            if (faceManagementFragment != null) {
+                faceManagementFragment.updateCallThread();
+            }
+            if (myQueriesFragment != null && count % 10 == 0) {
+                myQueriesFragment.updateCallThread();
+            }
+            count++;
+        }
     }
 }

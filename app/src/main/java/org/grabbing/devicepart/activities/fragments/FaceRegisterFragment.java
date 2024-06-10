@@ -7,14 +7,19 @@ import android.view.ViewGroup;
 import android.widget.Button;
 
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.Observer;
 
 import com.google.android.material.textfield.TextInputLayout;
 
 import org.grabbing.devicepart.R;
-import org.grabbing.devicepart.data.storage.StaticStorage;
+import org.grabbing.devicepart.data.storage.LongTermStorage;
+import org.grabbing.devicepart.livedata.TypeLive;
+import org.grabbing.devicepart.managers.FaceManager;
 
 public class FaceRegisterFragment extends Fragment {
     private TextInputLayout name;
+    Thread thread;
+
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -33,16 +38,54 @@ public class FaceRegisterFragment extends Fragment {
         Button register = view.findViewById(R.id.face_register_button_register);
         name = view.findViewById(R.id.face_register_text_input_layout_name);
 
+        thread = new Thread("FaceReg Thread");
+        TypeLive<Boolean> typeLive = new TypeLive<>(false);
+
+        typeLive.getStatusLive().observeForever(new Observer<Boolean>() {
+            @Override
+            public void onChanged(Boolean status) {
+                if (status) {
+                    synchronized (thread) {
+                        thread.notify();
+                    }
+                }
+            }
+        });
+
         register.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                StaticStorage.getExecutor().registerFace(name.getEditText().getText().toString());
+                typeLive.clearAll();
+                thread = new Thread(() -> register(name.getEditText().getText().toString(), typeLive));
+                thread.start();
             }
         });
 
 
         return view;
     }
+
+
+    private void register(String name, TypeLive<Boolean> typeLive) {
+        FaceManager faceManager = new FaceManager(getContext(), LongTermStorage.getToken(getContext()));
+        faceManager.register(name, typeLive);
+        synchronized (thread) {
+            try {
+                thread.wait();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+
+        Boolean currentData = typeLive.getData();
+
+        if (currentData) {
+            successCallThread();
+        } else {
+            errorCallThread();
+        }
+    }
+
 
     public void successCallThread() {
         getActivity().getSupportFragmentManager().beginTransaction().remove(FaceRegisterFragment.this).commit();

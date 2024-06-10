@@ -1,4 +1,4 @@
-package org.grabbing.devicepart.jsonforconversion;
+package org.grabbing.devicepart.dto;
 
 import java.util.Map;
 

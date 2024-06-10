@@ -2,40 +2,40 @@ package org.grabbing.devicepart.managers;
 
 import android.content.Context;
 
-import org.grabbing.devicepart.converters.JsonToListOfQueryData;
 import org.grabbing.devicepart.data.http.HttpGet;
-import org.grabbing.devicepart.data.http.HttpPost;
 import org.grabbing.devicepart.data.http.HttpQuery;
 import org.grabbing.devicepart.domain.QueryData;
-import org.grabbing.devicepart.hooks.QueryReceiptManagerHook;
-import org.grabbing.devicepart.livedata.QueryDataListLive;
 
-import java.util.ArrayList;
+import org.grabbing.devicepart.dto.QueryInput;
+import org.grabbing.devicepart.hooks.ListOfQueryInputHook;
+import org.grabbing.devicepart.livedata.TypeLive;
+
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class QueryReceiptManager {
     private final Context context;
-    private QueryDataListLive data;
-    private QueryData query;
+    private final String token;
 
-    public QueryReceiptManager(Context context) {
+    private static final String queryUrl = "http://192.168.0.75:8090/receivingqueries";
+
+    public QueryReceiptManager(Context context, String token) {
         this.context = context;
+        this.token = token;
     }
 
-    public void setQuery(QueryData query) {this.query = query;}
-    public void setData(QueryDataListLive data) {this.data = data;}
-
-    public void run() {
-        data.clearAll();
+    public void run(TypeLive<List<QueryInput>> typeLive) {
+        QueryData query = new QueryData(queryUrl, -1);
 
         query.setAddedUrl("/receive");
 
-        QueryReceiptManagerHook hook = new QueryReceiptManagerHook(data);
+        Map<String, String> headers = new HashMap<>();
+        headers.put("Authorization", "Bearer " + token);
+        query.setAuthorizationHeaders(headers);
+
         HttpQuery httpGet = new HttpGet(context);
-        httpGet.runRightAway(query, hook);
+        httpGet.runRightAway(query, new ListOfQueryInputHook(typeLive));
     }
 
-    public QueryData getQuery() {
-        return query;
-    }
 }

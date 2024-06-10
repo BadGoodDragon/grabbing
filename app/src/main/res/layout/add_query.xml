@@ -1,0 +1,177 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:id="@+id/add_query"
+    android:background="@color/white">
+
+    <androidx.appcompat.widget.AppCompatButton
+        android:id="@+id/add_query_button_back"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+
+        android:background="@drawable/button_background"
+
+        android:text="@string/face_management_back"
+
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        android:layout_marginLeft="20dp"
+        android:layout_marginRight="20dp"
+        android:layout_marginBottom="40dp"/>
+
+    <androidx.appcompat.widget.AppCompatButton
+        android:id="@+id/add_query_button_add"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+
+        android:layout_marginLeft="20dp"
+        android:layout_marginRight="20dp"
+
+        android:background="@drawable/button_background"
+        android:text="@string/add_add_query"
+        app:layout_constraintBottom_toTopOf="@+id/add_query_button_back"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        android:layout_marginBottom="20dp"/>
+
+    <TextView
+        android:id="@+id/textView"
+        android:layout_width="wrap_content"
+
+        android:layout_height="wrap_content"
+        android:layout_marginStart="20dp"
+        android:layout_marginTop="31dp"
+        android:gravity="start"
+
+        android:text="@string/add_query"
+        android:textSize="20dp"
+
+        android:textStyle="bold"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/add_query_text_input_layout_url"
+        android:layout_width="match_parent"
+
+        android:layout_height="wrap_content"
+
+        android:layout_marginLeft="20dp"
+
+        android:layout_marginRight="20dp"
+        android:hint="@string/url"
+
+
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+
+
+        app:layout_constraintTop_toBottomOf="@+id/textView">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/editTextName"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="text" />
+
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <ScrollView
+        android:id="@+id/scroll_view"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginLeft="20dp"
+        android:layout_marginTop="20dp"
+        android:layout_marginRight="20dp"
+        android:layout_marginBottom="20dp"
+        app:layout_constraintBottom_toTopOf="@+id/add_query_button_add"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="1.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/add_query_text_input_layout_url"
+        app:layout_constraintVertical_bias="1.0">
+
+        <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+            xmlns:app="http://schemas.android.com/apk/res-auto"
+            xmlns:tools="http://schemas.android.com/tools"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/textView1"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/parameters"
+                android:textSize="20dp"
+                android:textStyle="bold" />
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/recycler_view_parameters"
+                android:layout_width="match_parent"
+                android:layout_height="350dp"
+                android:background="@drawable/rounded_background"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/textView1"/>
+
+            <androidx.appcompat.widget.AppCompatButton
+                android:id="@+id/button_add_parameter"
+                android:layout_width="match_parent"
+                android:layout_height="40dp"
+
+                android:layout_marginTop="10dp"
+
+                android:background="@drawable/button_background"
+                android:gravity="center"
+                android:text="Add a Parameter"
+
+                app:layout_constraintBottom_toBottomOf="@id/view"
+                app:layout_constraintLeft_toLeftOf="@id/view"
+                app:layout_constraintRight_toLeftOf="@id/main_button_register" />
+
+            <TextView
+                android:id="@+id/textView2"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/headers"
+                android:textSize="20dp"
+                android:textStyle="bold"
+                android:layout_marginTop="31dp"/>
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/recycler_view_headers"
+                android:layout_width="match_parent"
+                android:layout_height="350dp"
+                android:background="@drawable/rounded_background"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/textView2" />
+
+            <androidx.appcompat.widget.AppCompatButton
+                android:id="@+id/button_add_header"
+                android:layout_width="match_parent"
+                android:layout_height="40dp"
+
+                android:layout_marginTop="10dp"
+                android:layout_marginBottom="20dp"
+
+                android:background="@drawable/button_background"
+                android:gravity="center"
+                android:text="Add a Header"
+
+                app:layout_constraintBottom_toBottomOf="@id/view"
+                app:layout_constraintLeft_toLeftOf="@id/view"
+                app:layout_constraintRight_toLeftOf="@id/main_button_register" />
+
+
+        </LinearLayout>
+
+
+    </ScrollView>
+
+</androidx.constraintlayout.widget.ConstraintLayout>
