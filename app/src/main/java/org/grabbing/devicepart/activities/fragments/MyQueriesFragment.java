@@ -52,9 +52,8 @@ public class MyQueriesFragment extends Fragment {
         add.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Updater.setMyQueriesFragment(null);
                 FragmentTransaction transaction = requireActivity().getSupportFragmentManager().beginTransaction();
-                transaction.add(R.id.my_queries, new AddQueryFragment());
+                transaction.add(R.id.main, new AddQueryFragment());
                 transaction.commit();
             }
         });

@@ -19,7 +19,7 @@ public class SendingResultManager {
     private final String token;
 
 
-    private static final String queryUrl = "http://195.2.85.71:8090/returningresults";
+    private static final String queryUrl = "http://192.168.0.75:8090/returningresults";
 
     public SendingResultManager(Context context, String token) {
         this.context = context;

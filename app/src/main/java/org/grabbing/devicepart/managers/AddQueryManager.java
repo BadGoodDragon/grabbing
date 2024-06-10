@@ -2,10 +2,15 @@ package org.grabbing.devicepart.managers;
 
 import android.content.Context;
 
+import com.google.gson.Gson;
+
 import org.grabbing.devicepart.data.http.HttpGet;
+import org.grabbing.devicepart.data.http.HttpPost;
 import org.grabbing.devicepart.domain.QueryData;
 import org.grabbing.devicepart.dto.MyQuery;
+import org.grabbing.devicepart.dto.NewQuery;
 import org.grabbing.devicepart.dto.QueryVisual;
+import org.grabbing.devicepart.hooks.EmptyHook;
 import org.grabbing.devicepart.hooks.ListOfMyQueryHook;
 import org.grabbing.devicepart.hooks.TypeHook;
 import org.grabbing.devicepart.livedata.TypeLive;
@@ -23,6 +28,24 @@ public class AddQueryManager {
     public AddQueryManager(Context context, String token) {
         this.context = context;
         this.token = token;
+    }
+
+    public void add(NewQuery newQuery) {
+        QueryData queryData = new QueryData(queryUrl, -1);
+
+        queryData.setAddedUrl("/add");
+
+        Map<String, String> headers = new HashMap<>();
+        headers.put("Authorization", "Bearer " + token);
+        queryData.setAuthorizationHeaders(headers);
+
+        Gson gson = new Gson();
+
+        queryData.setQueryBody(gson.toJson(newQuery));
+
+        HttpPost httpPost = new HttpPost(context);
+
+        httpPost.runRightAway(queryData, new EmptyHook());
     }
 
     public void getDone(TypeLive<List<MyQuery>> typeLive) {

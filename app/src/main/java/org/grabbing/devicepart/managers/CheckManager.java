@@ -14,7 +14,7 @@ public class CheckManager {
     private final Context context;
     private final String token;
 
-    private static final String queryUrl = "http://195.2.85.71:8090/checkmanagement";
+    private static final String queryUrl = "http://192.168.0.75:8090/checkmanagement";
 
 
     public CheckManager(Context context, String token) {

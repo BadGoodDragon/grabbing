@@ -16,7 +16,9 @@ import com.google.android.material.textfield.TextInputLayout;
 import org.grabbing.devicepart.R;
 import org.grabbing.devicepart.activities.Updater;
 import org.grabbing.devicepart.activities.recyclerview.ItemAdapter;
+import org.grabbing.devicepart.data.storage.LongTermStorage;
 import org.grabbing.devicepart.dto.NewQuery;
+import org.grabbing.devicepart.managers.AddQueryManager;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -24,6 +26,8 @@ import java.util.Map;
 public class AddQueryFragment extends Fragment {
     private ItemAdapter parametersAdapter;
     private ItemAdapter headersAdapter;
+
+    private Thread thread;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -47,10 +51,6 @@ public class AddQueryFragment extends Fragment {
                 getActivity().getSupportFragmentManager().beginTransaction().remove(AddQueryFragment.this).commit();
             }
         });
-
-        /*ListOfLinkedUsersAdapter customAdapter = new ListOfLinkedUsersAdapter(list);
-        recyclerView.setLayoutManager(new LinearLayoutManager(FaceManagementFragment.this.requireActivity().getApplicationContext()));
-        recyclerView.setAdapter(customAdapter);*/
 
         Map<String, String> test = new HashMap<>();
         test.put("", "");
@@ -91,15 +91,24 @@ public class AddQueryFragment extends Fragment {
         add.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                Log.e("step", "1");
                 NewQuery newQuery = new NewQuery(url.getEditText().getText().toString(),
                         parametersAdapter.getMap(),
                         headersAdapter.getMap(),
                         "",
-                        0); //TODO: write get body and host id;
-                Log.i("new query", newQuery.toString());
+                        2);
+                Log.i("new-query", newQuery.toString());
+                thread = new Thread(() -> addCallThread(newQuery));
+                thread.start();
             }
         });
 
         return view;
+    }
+
+    private void addCallThread(NewQuery newQuery) {
+        AddQueryManager addQueryManager = new AddQueryManager(getContext(), LongTermStorage.getToken(getContext()));
+
+        addQueryManager.add(newQuery);
     }
 }
