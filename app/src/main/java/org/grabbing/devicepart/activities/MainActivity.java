@@ -290,8 +290,14 @@ public class MainActivity extends AppCompatActivity {
                 Log.e("executeQueries", "authorizationStatus != 3");
 
                 inProcess = false;
-                start.setBackgroundResource(R.drawable.button_background);
-                start.setText("Error");
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        start.setBackgroundResource(R.drawable.button_background);
+                        start.setText("Start");
+                        MainActivity.this.status.setText("Error");
+                    }
+                });
 
                 return;
             }

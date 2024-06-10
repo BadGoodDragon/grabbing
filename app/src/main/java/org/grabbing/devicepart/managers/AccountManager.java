@@ -15,7 +15,7 @@ import java.util.Map;
 
 public class AccountManager {
     private final Context context;
-    private static final String queryUrl = "http://192.168.0.75:8090/accountmanagement";
+    private static final String queryUrl = "http://quickqueries.org/accountmanagement";
 
 
     public AccountManager(Context context) {
