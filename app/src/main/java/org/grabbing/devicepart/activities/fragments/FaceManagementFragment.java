@@ -146,6 +146,9 @@ public class FaceManagementFragment extends Fragment {
     }
 
     public void updateCallThread() {
+        if (listLive == null) {
+            return;
+        }
         listLive.clearAll();
         thread = new Thread(() -> getListOfUsers(listLive));
         thread.start();
