@@ -11,6 +11,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import org.grabbing.devicepart.R;
 import org.grabbing.devicepart.activities.fragments.AccountLogInFragment;
@@ -190,6 +191,11 @@ public class MainActivity extends AppCompatActivity {
         myQueries.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                if (authorizationStatus != 3) {
+                    Toast.makeText(getApplicationContext(), "You cannot add queries if you are not linked to a face", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+
                 MyQueriesFragment myQueriesFragment = new MyQueriesFragment();
                 Updater.setMyQueriesFragment(myQueriesFragment);
                 FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
