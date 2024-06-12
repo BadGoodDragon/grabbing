@@ -10,6 +10,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.Toast;
 
 import com.google.android.material.textfield.TextInputLayout;
 
@@ -104,6 +105,7 @@ public class AddQueryFragment extends Fragment {
                         2);
                 thread = new Thread(() -> addCallThread(newQuery));
                 thread.start();
+                Toast.makeText(getContext(), "A new query has been added!", Toast.LENGTH_SHORT).show();
             }
         });
 
